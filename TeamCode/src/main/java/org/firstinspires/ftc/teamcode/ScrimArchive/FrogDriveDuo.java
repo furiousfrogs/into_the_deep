@@ -1,29 +1,14 @@
-package org.firstinspires.ftc.teamcode;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+package org.firstinspires.ftc.teamcode.ScrimArchive;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;//importing libraries
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-import com.qualcomm.hardware.bosch.BHI260IMU;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
-@TeleOp(name = "SoloTelemetryIMU", group= "TeleOp")
-public class SoloTelemetryIMU extends OpMode {
-
-    private BHI260IMU imu;
-    private ElapsedTime runtime = new ElapsedTime();
-
-
+@TeleOp(name = "FrogDriveDuo", group= "TeleOp")
+public class FrogDriveDuo extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo servoL, servoR, spinOut;
     private CRServo spinIn;
@@ -50,24 +35,12 @@ public class SoloTelemetryIMU extends OpMode {
     boolean resetver = false;
     Gamepad currentGamepad1;
     Gamepad previousGamepad1;
+    Gamepad currentGamepad2;
+    Gamepad previousGamepad2;
 
 
     @Override
     public void init() {
-
-        imu=hardwareMap.get(BHI260IMU.class,"imu");
-        imu.initialize(
-                new IMU.Parameters(
-                        new RevHubOrientationOnRobot(
-                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)
-                )
-        );
-        runtime.reset();
-
-
-
-
         frontLeft = hardwareMap.get(DcMotor.class, "front_left");
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -116,6 +89,8 @@ public class SoloTelemetryIMU extends OpMode {
 
         currentGamepad1 = new Gamepad();
         previousGamepad1 = new Gamepad();
+        currentGamepad2 = new Gamepad();
+        previousGamepad2 = new Gamepad();
         hortouch = hardwareMap.get(TouchSensor.class, "hortouch");
         vertouch = hardwareMap.get(TouchSensor.class, "vertouch");
 
@@ -161,6 +136,11 @@ public class SoloTelemetryIMU extends OpMode {
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
+        telemetry.addData("frontLeftPower",frontLeft.getPower());
+        telemetry.addData("front right",frontRight.getPower());
+        telemetry.addData("backleft",backLeft.getPower());
+        telemetry.addData("backright",backRight.getPower());
+
     }
 
     //    public void programmedTake() throws InterruptedException {
@@ -222,16 +202,18 @@ public class SoloTelemetryIMU extends OpMode {
         previousGamepad1.copy(currentGamepad1);
         // Update current state with the latest gamepad data
         currentGamepad1.copy(gamepad1);
+        previousGamepad2.copy(currentGamepad2);
+        // Update current state with the latest gamepad data
+        currentGamepad2.copy(gamepad2);
 
-
-        if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) { //Intake
+        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) { //Intake
             if (spinIn.getPower() == 0) {
                 spinIn.setPower(-1);
             } else {
                 spinIn.setPower(0);
             }
 
-        } else if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) { //Outtake
+        } else if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) { //Outtake
             if (spinIn.getPower() == 0) {
                 spinIn.setPower(1);
             } else {
@@ -248,7 +230,7 @@ public class SoloTelemetryIMU extends OpMode {
 //        vertSlideR.setPower(-gamepad1.right_stick_y);
 
 
-        if (currentGamepad1.cross && !previousGamepad1.cross) { // Arm down
+        if (currentGamepad2.cross && !previousGamepad2.cross) { // Arm down
             if (servoL.getPosition() > 0.2 && Math.abs(horSlide.getCurrentPosition()) > 50) {
                 // Set servo positions to ArmDwn
                 servoL.setPosition(ArmDwn);
@@ -310,7 +292,7 @@ public class SoloTelemetryIMU extends OpMode {
 //            }
 //        }
 
-        if (currentGamepad1.square && !previousGamepad1.square) {
+        if (currentGamepad2.square && !previousGamepad2.square || currentGamepad1.square && !previousGamepad1.square) {
             spinIn.setPower(0);
             servoL.setPosition(ArmUp);
             servoR.setPosition(ArmUp);
@@ -329,11 +311,11 @@ public class SoloTelemetryIMU extends OpMode {
             resetver = false;
         }
         if (!resethor) {
-            horSlide.setPower(gamepad1.right_stick_x); //Horizontalslide
+            horSlide.setPower(gamepad2.right_stick_x); //Horizontalslide
         }
         if (!resetver) {
-            vertSlideL.setPower(-gamepad2.right_stick_y-gamepad1.right_stick_y); //Vertical Slide
-            vertSlideR.setPower(-gamepad2.right_stick_y-gamepad1.right_stick_y);
+            vertSlideL.setPower(-gamepad2.right_stick_y); //Vertical Slide
+            vertSlideR.setPower(-gamepad2.right_stick_y);
         }
 
 //            vertSlideL.setTargetPosition(0);
@@ -374,16 +356,6 @@ public class SoloTelemetryIMU extends OpMode {
         } else if (servoL.getPosition() == ArmDwn){
             telemetry.addLine("Arm Down");
         }
-
-        YawPitchRollAngles robotOrientation;
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-        double Yaw= robotOrientation.getYaw(AngleUnit.DEGREES);
-        double Pitch = robotOrientation.getPitch(AngleUnit.DEGREES);
-        double Roll = robotOrientation.getRoll (AngleUnit.DEGREES);
-
-        telemetry.addData("Pitch:",Yaw);
-        telemetry.addData("Pitch",Pitch);
-        telemetry.addData("Roll",Roll);
     }
     @Override
     public void loop () {

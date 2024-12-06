@@ -1,4 +1,5 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.ScrimArchive;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;//importing libraries
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -7,12 +8,21 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-@TeleOp(name = "FrogDriveDuo", group= "TeleOp")
-public class FrogDriveDuo extends OpMode {
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+
+@TeleOp(name = "FrogDriveSolo", group= "TeleOp")
+public class FrogDriveSolo extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo servoL, servoR, spinOut;
     private CRServo spinIn;
     private DcMotor horSlide, vertSlideL, vertSlideR;
+    private BHI260IMU imu;
+    private ElapsedTime runtime = new ElapsedTime();
     private int step = 0;
     //0: vert and hor retracted, inouttake not spinning, servos are tucked in
     //1: hor is retracted, vert is slowly extending, intake spinning, outtake not spinning, servos turned out
@@ -35,8 +45,6 @@ public class FrogDriveDuo extends OpMode {
     boolean resetver = false;
     Gamepad currentGamepad1;
     Gamepad previousGamepad1;
-    Gamepad currentGamepad2;
-    Gamepad previousGamepad2;
 
 
     @Override
@@ -87,10 +95,19 @@ public class FrogDriveDuo extends OpMode {
         vertSlideR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         vertSlideR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        imu=hardwareMap.get(BHI260IMU.class,"imu");
+        imu.initialize(
+                new IMU.Parameters(
+                        new RevHubOrientationOnRobot(
+                                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                                RevHubOrientationOnRobot.UsbFacingDirection.UP
+                        )
+                )
+        );
+        runtime.reset();
+
         currentGamepad1 = new Gamepad();
         previousGamepad1 = new Gamepad();
-        currentGamepad2 = new Gamepad();
-        previousGamepad2 = new Gamepad();
         hortouch = hardwareMap.get(TouchSensor.class, "hortouch");
         vertouch = hardwareMap.get(TouchSensor.class, "vertouch");
 
@@ -115,9 +132,13 @@ public class FrogDriveDuo extends OpMode {
         } else if (Math.abs(gamepad1.left_stick_y) <= 0.4) {
             driveY = slowvar * -gamepad1.left_stick_y;
         }
-
-
-        double rotate = 0.7 * (RightTurn - LeftTurn);
+        double rotate;
+        if (horSlide.getCurrentPosition()>100){
+            rotate = 0.2*(RightTurn-LeftTurn);
+        }
+        else{
+            rotate=0.7*(RightTurn-LeftTurn);
+        }
         double angle = Math.atan2(driveY, driveX) - Math.PI / 4;//caculate output
         double magnitude = Math.hypot(driveX, driveY) - 0.1;//MIGHT BREAK CODE IDK CONSTANT VALUE
         double frontLeftPower = magnitude * Math.cos(angle) + rotate;
@@ -136,11 +157,6 @@ public class FrogDriveDuo extends OpMode {
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
-        telemetry.addData("frontLeftPower",frontLeft.getPower());
-        telemetry.addData("front right",frontRight.getPower());
-        telemetry.addData("backleft",backLeft.getPower());
-        telemetry.addData("backright",backRight.getPower());
-
     }
 
     //    public void programmedTake() throws InterruptedException {
@@ -202,18 +218,16 @@ public class FrogDriveDuo extends OpMode {
         previousGamepad1.copy(currentGamepad1);
         // Update current state with the latest gamepad data
         currentGamepad1.copy(gamepad1);
-        previousGamepad2.copy(currentGamepad2);
-        // Update current state with the latest gamepad data
-        currentGamepad2.copy(gamepad2);
 
-        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) { //Intake
+
+        if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) { //Intake
             if (spinIn.getPower() == 0) {
                 spinIn.setPower(-1);
             } else {
                 spinIn.setPower(0);
             }
 
-        } else if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) { //Outtake
+        } else if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) { //Outtake
             if (spinIn.getPower() == 0) {
                 spinIn.setPower(1);
             } else {
@@ -230,7 +244,7 @@ public class FrogDriveDuo extends OpMode {
 //        vertSlideR.setPower(-gamepad1.right_stick_y);
 
 
-        if (currentGamepad2.cross && !previousGamepad2.cross) { // Arm down
+        if (currentGamepad1.cross && !previousGamepad1.cross) { // Arm down
             if (servoL.getPosition() > 0.2 && Math.abs(horSlide.getCurrentPosition()) > 50) {
                 // Set servo positions to ArmDwn
                 servoL.setPosition(ArmDwn);
@@ -292,7 +306,7 @@ public class FrogDriveDuo extends OpMode {
 //            }
 //        }
 
-        if (currentGamepad2.square && !previousGamepad2.square || currentGamepad1.square && !previousGamepad1.square) {
+        if (currentGamepad1.square && !previousGamepad1.square) {
             spinIn.setPower(0);
             servoL.setPosition(ArmUp);
             servoR.setPosition(ArmUp);
@@ -311,11 +325,11 @@ public class FrogDriveDuo extends OpMode {
             resetver = false;
         }
         if (!resethor) {
-            horSlide.setPower(gamepad2.right_stick_x); //Horizontalslide
+            horSlide.setPower(gamepad1.right_stick_x); //Horizontalslide
         }
         if (!resetver) {
-            vertSlideL.setPower(-gamepad2.right_stick_y); //Vertical Slide
-            vertSlideR.setPower(-gamepad2.right_stick_y);
+            vertSlideL.setPower(-gamepad2.right_stick_y-gamepad1.right_stick_y); //Vertical Slide
+            vertSlideR.setPower(-gamepad2.right_stick_y-gamepad1.right_stick_y);
         }
 
 //            vertSlideL.setTargetPosition(0);
@@ -356,6 +370,18 @@ public class FrogDriveDuo extends OpMode {
         } else if (servoL.getPosition() == ArmDwn){
             telemetry.addLine("Arm Down");
         }
+
+        YawPitchRollAngles robotOrientation;
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        double Yaw=robotOrientation.getYaw(AngleUnit.DEGREES);
+        double Pitch = robotOrientation.getPitch(AngleUnit.DEGREES);
+        double Roll = robotOrientation.getRoll(AngleUnit.DEGREES);
+        telemetry.addLine("IMU");
+        telemetry.addData("Yaw:",Yaw);
+        telemetry.addData("Pitch:",Pitch);
+        telemetry.addData("Roll:", Roll);
+
+        telemetry.update();
     }
     @Override
     public void loop () {
@@ -374,3 +400,15 @@ public class FrogDriveDuo extends OpMode {
 //        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
