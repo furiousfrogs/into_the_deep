@@ -281,6 +281,7 @@ public class FrogChargyPID extends OpMode {
         if (vertouch.isPressed()) { //Reset vertical encoders
             vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             vertSlideL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            FFVar.targetPosition=0;
             vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             vertSlideR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
