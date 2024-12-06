@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.ScrimArchive;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;//importing libraries
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -6,7 +7,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
+@Disabled
 @TeleOp(name = "FrogDriveDuo", group= "TeleOp")
 public class FrogDriveDuo extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
