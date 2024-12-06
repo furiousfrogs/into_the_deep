@@ -19,8 +19,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.InternalWebSocketCommandException;
 
-@TeleOp(name = "FrogDerpsNoPID", group= "TeleOp")
-public class FrogDerpsNoPID extends OpMode {
+@TeleOp(name = "FrogDerpsNoPIDCentric", group= "TeleOp")
+public class FrogDerpsNoPIDCentric extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
@@ -68,13 +68,15 @@ public class FrogDerpsNoPID extends OpMode {
     public void init() {
 
         imu=hardwareMap.get(BHI260IMU.class,"imu");
-        imu.initialize(
-                new IMU.Parameters(
-                        new RevHubOrientationOnRobot(
+        IMU.Parameters parameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
                                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT)
-                )
-        );
+                );
+
+
+        imu.initialize(parameters);
+
 
         timer = new ElapsedTime();
 
@@ -145,7 +147,7 @@ public class FrogDerpsNoPID extends OpMode {
         timer.reset();
 
 
-        // Blocking delay (not recommended for complex systems)
+
         while (timer.seconds() < 0.3) {
             // Wait for 1 second
         }
@@ -157,24 +159,28 @@ public class FrogDerpsNoPID extends OpMode {
 
 
     public void drive() {
-        // Input scaling
-        double driveX = scaleInput(gamepad1.left_stick_x);
-        double driveY = scaleInput(-gamepad1.left_stick_y); // Invert Y-axis
-        double RightTurn = gamepad1.right_trigger;
-        double LeftTurn = gamepad1.left_trigger;
+        if (gamepad1.options) {
+            imu.resetYaw();
+        }
 
-        // Dynamic turning adjustment
         double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
-        double rotate = (0.7 * (RightTurn - LeftTurn)) / turnvar;
 
-        // Mecanum drive calculations
-        double angle = Math.atan2(driveY, driveX) - Math.PI / 4;
-        double magnitude = Math.min(1.0, Math.hypot(driveX, driveY) - 0.1);
+        double y = -gamepad1.left_stick_y;
+        double x = gamepad1.left_stick_x;
+        double rx = (gamepad1.right_trigger - gamepad1.left_trigger)/turnvar;
 
-        double frontLeftPower = magnitude * Math.cos(angle) + rotate;
-        double frontRightPower = magnitude * Math.sin(angle) - rotate;
-        double backLeftPower = magnitude * Math.sin(angle) + rotate;
-        double backRightPower = magnitude * Math.cos(angle) - rotate;
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double rotX = (x) * Math.cos(-botHeading) - (y) * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+        rotX = rotX * 1.1;
+
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
+
 
         // Normalize motor powers
         double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower),
@@ -185,23 +191,17 @@ public class FrogDerpsNoPID extends OpMode {
             backLeftPower /= maxPower;
             backRightPower /= maxPower;
         }
-
+        if (vertSlideL.getCurrentPosition() > 2000) {
+            frontLeftPower = frontLeftPower/2;
+            frontRightPower = frontRightPower/2;
+            backLeftPower = backLeftPower/2;
+            backRightPower = backRightPower/2;
+        }
         // Set motor powers
         frontLeft.setPower(frontLeftPower);
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
-    }
-
-    private double scaleInput(double input) {
-        double threshold = 0.6;
-        double slowFactor = 0.3;
-
-        if (Math.abs(input) > threshold) {
-            return input; // Full speed
-        } else {
-            return input * slowFactor; // Reduced speed
-        }
     }
 
     public void manualTake() {
@@ -214,7 +214,7 @@ public class FrogDerpsNoPID extends OpMode {
         // Update current state with the latest gamepad data
         currentGamepad1.copy(gamepad1);
 
-        if (gamepad1.options) {
+        if (gamepad1.options && !intaking && !outtaking) {
             outArm.setPosition(FFVar.ArmOut);
             wrist.setPosition(FFVar.WristOut);
             claw.setPosition(FFVar.ClawOpen);
@@ -257,12 +257,12 @@ public class FrogDerpsNoPID extends OpMode {
         }
 
 
-        if (currentGamepad1.cross && !previousGamepad1.cross) { // Arm down
+        if (currentGamepad1.cross && !previousGamepad1.cross && !transfering) { // Arm down
             if (leftIn.getPosition() > 0.5) {
                 // Set servo positions to ArmDwn
                 leftIn.setPosition(FFVar.InWait);
                 rightIn.setPosition(FFVar.InWait);
-            } else if ((leftIn.getPosition() < 0.5) && Math.abs(horSlide.getCurrentPosition()) > 300) {
+            } else if ((leftIn.getPosition() < 0.5) && Math.abs(horSlide.getCurrentPosition()) > 350) {
                 // Set servo positions to ArmUp
                 leftIn.setPosition(FFVar.InDown);
                 rightIn.setPosition(FFVar.InDown);
@@ -290,6 +290,7 @@ public class FrogDerpsNoPID extends OpMode {
         }
 
         if (currentGamepad1.circle && !previousGamepad1.circle && sample) {
+            outtaking = true;
             // Start the Outtake action
             outArm.setPosition(FFVar.ArmOut2);
             wrist.setPosition(FFVar.WristOut);
@@ -317,6 +318,7 @@ public class FrogDerpsNoPID extends OpMode {
 
                 OuttakeAction2 = false;
                 sample = false;
+                outtaking = false;
             }
         }
 
@@ -452,7 +454,7 @@ public class FrogDerpsNoPID extends OpMode {
 // Handle vertical slide reset logic
 
         if (!resetver && !transfering) {
-            if (vertSlideR.getCurrentPosition() > 3500) {
+            if (vertSlideR.getCurrentPosition() > 4000) {
                 if (gamepad1.right_stick_y > 0) {
                     vertSlideL.setPower(-gamepad1.right_stick_y); // Vertical slide
                     vertSlideR.setPower(-gamepad1.right_stick_y);
