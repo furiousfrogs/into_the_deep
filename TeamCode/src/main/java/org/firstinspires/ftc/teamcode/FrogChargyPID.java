@@ -329,8 +329,7 @@ public class FrogChargyPID extends OpMode {
                 horSlide.setPower(-1);
             }
             if (!vertouch.isPressed()) {
-                vertSlideR.setPower(-1);
-                vertSlideL.setPower(-1);
+                FFVar.targetPosition=0;
             }
             resethor = true;
             resetver = true;
