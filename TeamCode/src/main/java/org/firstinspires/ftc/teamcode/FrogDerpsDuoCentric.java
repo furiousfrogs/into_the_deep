@@ -19,8 +19,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.InternalWebSocketCommandException;
 
-@TeleOp(name = "FrogDerpsNoPIDCentric", group= "TeleOp")
-public class FrogDerpsNoPIDCentric extends OpMode {
+@TeleOp(name = "FrogDerpsDuoCentric", group= "TeleOp")
+public class FrogDerpsDuoCentric extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
@@ -61,6 +61,8 @@ public class FrogDerpsNoPIDCentric extends OpMode {
     boolean intaking = false;
     Gamepad currentGamepad1;
     Gamepad previousGamepad1;
+    Gamepad currentGamepad2;
+    Gamepad previousGamepad2;
 
 
 
@@ -70,9 +72,9 @@ public class FrogDerpsNoPIDCentric extends OpMode {
         imu=hardwareMap.get(BHI260IMU.class,"imu");
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT)
-                );
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT)
+        );
 
 
         imu.initialize(parameters);
@@ -139,8 +141,11 @@ public class FrogDerpsNoPIDCentric extends OpMode {
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        currentGamepad2 = new Gamepad();
+        previousGamepad2 = new Gamepad();
         currentGamepad1 = new Gamepad();
         previousGamepad1 = new Gamepad();
+
         hortouch = hardwareMap.get(TouchSensor.class, "hortouch");
         vertouch = hardwareMap.get(TouchSensor.class, "vertouch");
         coloursensor = hardwareMap.get(ColorRangeSensor.class, "coloursensor");
@@ -214,26 +219,31 @@ public class FrogDerpsNoPIDCentric extends OpMode {
         // Update current state with the latest gamepad data
         currentGamepad1.copy(gamepad1);
 
-        if (gamepad1.options && !intaking && !outtaking) {
+        // Store previous state
+        previousGamepad2.copy(currentGamepad2);
+        // Update current state with the latest gamepad data
+        currentGamepad2.copy(gamepad2);
+
+        if (gamepad2.options && !intaking && !outtaking) {
             outArm.setPosition(FFVar.ArmOut);
             wrist.setPosition(FFVar.WristOut);
             claw.setPosition(FFVar.ClawOpen);
         }
 
-        if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) { //Intake
+        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) { //Intake
             if (intake.getPower() < 0.2) {
                 intake.setPower(0.8);
                 intaking = false;
-            } else if (intake.getPower() > 0.2 && currentGamepad1.right_bumper && !previousGamepad1.right_bumper) {
+            } else if (intake.getPower() > 0.2 && currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {
                 intake.setPower(0);
                 intaking = false;
             }
         }
 
 
-        if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
+        if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) {
             if (intake.getPower() > -0.2) {
-                intake.setPower(-1); // Reverse
+                intake.setPower(-0.8); // Reverse
                 intaking = true;
             } else {
                 intake.setPower(0); // Stop
@@ -257,7 +267,7 @@ public class FrogDerpsNoPIDCentric extends OpMode {
         }
 
 
-        if (currentGamepad1.cross && !previousGamepad1.cross && !transfering) { // Arm down
+        if (currentGamepad2.cross && !previousGamepad2.cross && !transfering) { // Arm down
             if (leftIn.getPosition() > 0.5) {
                 // Set servo positions to ArmDwn
                 leftIn.setPosition(FFVar.InWait);
@@ -289,7 +299,7 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             rightIn.setPosition(FFVar.InWait);
         }
 
-        if (currentGamepad1.circle && !previousGamepad1.circle && sample && !transfering) {
+        if (currentGamepad2.circle && !previousGamepad2.circle && sample) {
             outtaking = true;
             // Start the Outtake action
             outArm.setPosition(FFVar.ArmOut2);
@@ -322,7 +332,7 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             }
         }
 
-        if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+        if ((currentGamepad2.triangle && !previousGamepad2.triangle) || (currentGamepad1.square && !previousGamepad1.square)) {
             if (!hortouch.isPressed()) {
                 horSlide.setPower(-1);
             }
@@ -334,7 +344,7 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             resetver = true;
         }
 
-        if (currentGamepad1.square && !previousGamepad1.square && !transfering && !outtaking) {
+        if (((currentGamepad2.square && !previousGamepad2.square) || (currentGamepad1.square && !previousGamepad1.square))  && !transfering && !outtaking) {
             transfering = true;
             leftIn.setPosition(FFVar.InWait);
             rightIn.setPosition(FFVar.InWait);
@@ -431,14 +441,14 @@ public class FrogDerpsNoPIDCentric extends OpMode {
                 limitCalculated = true; // Lock the limit while the slide is moving
             }
             if (horSlide.getCurrentPosition() > dynamicLimit) {
-                if (gamepad1.right_stick_x < 0) {
-                    horSlide.setPower(gamepad1.right_stick_x);
+                if (gamepad2.right_stick_x < 0) {
+                    horSlide.setPower(gamepad2.right_stick_x);
                 } else {
                     horSlide.setPower(0);
                 }
             } else {
-                horSlide.setPower(gamepad1.right_stick_x); // Horizontal slide
-                if (gamepad1.right_stick_x != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
+                horSlide.setPower(gamepad2.right_stick_x); // Horizontal slide
+                if (gamepad2.right_stick_x != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
                     leftIn.setPosition(FFVar.InWait);
                     rightIn.setPosition(FFVar.InWait);
                 } else if (hortouch.isPressed()) {
@@ -448,23 +458,23 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             }
 
         }
-        if (Math.abs(gamepad1.right_stick_x) < 0.1) {
+        if (Math.abs(gamepad2.right_stick_x) < 0.1) {
             limitCalculated = false; // Allow recalculation of the limit
         }
 // Handle vertical slide reset logic
 
         if (!resetver && !transfering) {
             if (vertSlideR.getCurrentPosition() > 4000) {
-                if (gamepad1.right_stick_y > 0) {
-                    vertSlideL.setPower(-gamepad1.right_stick_y); // Vertical slide
-                    vertSlideR.setPower(-gamepad1.right_stick_y);
+                if (gamepad2.right_stick_y > 0) {
+                    vertSlideL.setPower(-gamepad2.right_stick_y); // Vertical slide
+                    vertSlideR.setPower(-gamepad2.right_stick_y);
                 } else {
                     vertSlideL.setPower(0); // Vertical slide
                     vertSlideR.setPower(0);
                 }
             } else {
-                vertSlideL.setPower(-gamepad1.right_stick_y); // Vertical slide
-                vertSlideR.setPower(-gamepad1.right_stick_y);
+                vertSlideL.setPower(-gamepad2.right_stick_y); // Vertical slide
+                vertSlideR.setPower(-gamepad2.right_stick_y);
             }
 
         }
