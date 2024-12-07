@@ -10,7 +10,7 @@ public class FFVar {
     public static float OuttakeTime = 0.3F;
     public static float OuttakeTime2 = 0.5F;
     //Bigger number - intake is lower
-    public static float InDown = 0.57F;
+    public static float InDown = 0.565F;
     public static float InUp = 0.2F;
     public static float InTransfer = 0.25F;
     public static float InWait = 0.44F; //this is the position where the intake arm waits for the outtake arm to go down
