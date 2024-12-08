@@ -463,10 +463,8 @@ public class FrogChargyPID extends OpMode {
             }
 
         }
-
 // Clamp target position to safe limits
         FFVar.targetPosition = Math.max(0, Math.min(4000, FFVar.targetPosition)); // Adjust range as needed
-
 
         double currentPosition= vertSlideL.getCurrentPosition();
         double error = (float) (FFVar.targetPosition-currentPosition);
