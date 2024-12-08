@@ -14,6 +14,7 @@ public class FFVar {
     public static float InUp = 0.2F;
     public static float InTransfer = 0.25F;
     public static float InWait = 0.44F; //this is the position where the intake arm waits for the outtake arm to go down
+    public static float InWait2 = 0.3F; // this is for square when slide is retracted
 
     //Bigger number - arm is lower
     public static float ArmOut2 = 0.09F;

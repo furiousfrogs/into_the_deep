@@ -374,10 +374,15 @@ public class FrogDerpsDuoCentric extends OpMode {
 // Check if an action is in progress
         if (Transfer1action) {
             if (hortouch.isPressed() && vertouch.isPressed() && Transfer1Timer.seconds() > FFVar.TransferATime) {
-
+                if (horSlide.getCurrentPosition() >= 350) {
+                    leftIn.setPosition(FFVar.InTransfer);
+                    rightIn.setPosition(FFVar.InTransfer);
+                } else {
+                    leftIn.setPosition(FFVar.InWait2);
+                    rightIn.setPosition(FFVar.InWait2);
+                }
                 // Set the positions for leftIn and rightIn after delay
-                leftIn.setPosition(FFVar.InTransfer);
-                rightIn.setPosition(FFVar.InTransfer);
+
 
                 Transfer2action = true;
                 Transfer2Timer.reset();
