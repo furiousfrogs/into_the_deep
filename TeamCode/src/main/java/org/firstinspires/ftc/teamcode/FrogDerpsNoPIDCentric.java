@@ -289,7 +289,7 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             rightIn.setPosition(FFVar.InWait);
         }
 
-        if (currentGamepad1.circle && !previousGamepad1.circle && sample && !transfering) {
+        if (currentGamepad1.circle && !previousGamepad1.circle && sample && !transfering) { // Only allow outtake after a transfer has happened
             outtaking = true;
             // Start the Outtake action
             outArm.setPosition(FFVar.ArmOut2);
@@ -298,26 +298,25 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             OuttakeTimer.reset(); // Reset the timer
             OuttakeAction = true; // Mark the action as in progress
         }
-
-// Check if Outtake action is in progress
+        //Begin Outtaking sequence
         if (OuttakeAction) {
             if (OuttakeTimer.seconds() >= FFVar.OuttakeTime) {
                 // Perform the next step of the action
                 claw.setPosition(FFVar.ClawOpen);
                 OuttakeAction = false; // End the action
-                OuttakeAction2 = true;
+                OuttakeAction2 = true; // Start the next action
                 OuttakeTimer2.reset();
             }
         }
 
-        if (OuttakeAction2) {
+        if (OuttakeAction2) { // Finish the outtake action
             if (OuttakeTimer2.seconds() >= FFVar.OuttakeTime2) {
                 claw.setPosition(FFVar.ClawClose);
                 outArm.setPosition(FFVar.ArmWait);
                 wrist.setPosition(FFVar.WristOut);
 
                 OuttakeAction2 = false;
-                sample = false;
+                sample = false; // Reset the Sample boolean
                 outtaking = false;
             }
         }
@@ -377,16 +376,12 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             }
         }
         if (Transfer2action) {
-
-            if (Transfer2Timer.seconds() >= FFVar.TransferBTime) {
+            if (Transfer2Timer.seconds() >= FFVar.TransferBTime) { // Run the action only after the timer reaches a certain time
                 claw.setPosition(FFVar.ClawClose);
-
-
+                Transfer2action = false; // Finish sequence
                 Transfer3action = true;
-                Transfer3Timer.reset();
+                Transfer3Timer.reset(); // Setup the next sequence
 
-                // End the action
-                Transfer2action = false;
             }
         }
         if (Transfer3action) {
@@ -396,10 +391,10 @@ public class FrogDerpsNoPIDCentric extends OpMode {
                 wrist.setPosition(FFVar.WristTransfer2);
                 leftIn.setPosition(FFVar.InWait);
                 rightIn.setPosition(FFVar.InWait);
-                Transfer3action = false;
+                Transfer3action = false; // Finish sequence
 
                 Transfer4Timer.reset();
-                Transfer4action = true;
+                Transfer4action = true; // Prepare for next sequence
             }
 
         }
