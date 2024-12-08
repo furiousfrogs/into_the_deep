@@ -230,7 +230,6 @@ public class FrogDerpsNoPIDCentric extends OpMode {
             }
         }
 
-
         if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
             if (intake.getPower() > -0.2) {
                 intake.setPower(-1); // Reverse
