@@ -472,6 +472,7 @@ public class FrogChargyPID extends OpMode {
         double error = (float) (FFVar.targetPosition-currentPosition);
         FFVar.integralSum += (float) (error * runTime.seconds());
         double derivative = (error-FFVar.lastError)/runTime.seconds();
+
         double power = FFVar.kP*error+FFVar.kI*FFVar.integralSum+FFVar.kD*derivative;
         power = Math.max(-1, Math.min(1, power));
         vertSlideL.setPower(power);
