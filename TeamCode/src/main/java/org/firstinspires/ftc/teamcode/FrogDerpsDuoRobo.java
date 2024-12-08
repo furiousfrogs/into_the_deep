@@ -17,10 +17,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
 import org.firstinspires.ftc.robotcore.internal.webserver.websockets.InternalWebSocketCommandException;
 
-@TeleOp(name = "FrogDerpsDuoCentric", group= "TeleOp")
-public class FrogDerpsDuoCentric extends OpMode {
+@TeleOp(name = "FrogDerpsDuoRobo", group= "TeleOp")
+public class FrogDerpsDuoRobo extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
@@ -63,6 +64,7 @@ public class FrogDerpsDuoCentric extends OpMode {
     Gamepad previousGamepad1;
     Gamepad currentGamepad2;
     Gamepad previousGamepad2;
+
 
 
 
@@ -164,27 +166,25 @@ public class FrogDerpsDuoCentric extends OpMode {
 
 
     public void drive() {
-        if (gamepad1.options) {
-            imu.resetYaw();
-        }
 
-        double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
+        boolean slow = gamepad1.options;
+        double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+        double rx = gamepad1.right_trigger - gamepad1.left_trigger;
 
-        double y = -gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x;
-        double rx = (gamepad1.right_trigger - gamepad1.left_trigger)/turnvar;
+        double slowvar = 2.0; // Slow mode divisor
+        double speedFactor = slow ? 1 / slowvar : 1;
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        double rotX = (x) * Math.cos(-botHeading) - (y) * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
 
-        rotX = rotX * 1.1;
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
+        double frontLeftPower = (y + x + rx) / denominator * speedFactor;
+        double backLeftPower = (y - x + rx) / denominator * speedFactor;
+        double frontRightPower = (y - x - rx) / denominator * speedFactor;
+        double backRightPower = (y + x - rx) / denominator * speedFactor;
 
 
         // Normalize motor powers
@@ -208,7 +208,6 @@ public class FrogDerpsDuoCentric extends OpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
     }
-
     public void manualTake() {
         //manual controls
         int red = coloursensor.red();
@@ -380,8 +379,8 @@ public class FrogDerpsDuoCentric extends OpMode {
         if (Transfer1action) {
             if (hortouch.isPressed() && vertouch.isPressed() && Transfer1Timer.seconds() > FFVar.TransferATime) {
 
-                    leftIn.setPosition(FFVar.InTransfer);
-                    rightIn.setPosition(FFVar.InTransfer);
+                leftIn.setPosition(FFVar.InTransfer);
+                rightIn.setPosition(FFVar.InTransfer);
 
                 // Set the positions for leftIn and rightIn after delay
 
