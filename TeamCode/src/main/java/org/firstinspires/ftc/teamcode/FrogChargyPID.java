@@ -343,8 +343,7 @@ public class FrogChargyPID extends OpMode {
                 horSlide.setPower(-1);
             }
             if (!vertouch.isPressed()) {
-                vertSlideR.setPower(-1);
-                vertSlideL.setPower(-1);
+                FFVar.targetPosition-= 10;
             }
             // Move the arm and wrist to their positions
             outArm.setPosition(FFVar.ArmTransfer);
