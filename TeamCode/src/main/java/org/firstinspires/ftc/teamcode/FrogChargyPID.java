@@ -335,6 +335,7 @@ public class FrogChargyPID extends OpMode {
             resetver = true;
         }
 
+
         if (currentGamepad1.square && !previousGamepad1.square && !transfering && !outtaking) {
             transfering = true;
             leftIn.setPosition(FFVar.InWait);
