@@ -473,9 +473,9 @@ public class FrogChargyPID extends OpMode {
         double derivative = (error-FFVar.lastError)/runTime.seconds();
 
         double power = FFVar.kP*error+FFVar.kI*FFVar.integralSum+FFVar.kD*derivative;
-        power = Math.max(-1, Math.min(1, power));
-        vertSlideL.setPower(power);
-        vertSlideR.setPower(power);
+        power = Math .max(-1, Math.min(1, power));
+        vertSlideL.setTargetPosition((int)power);
+        vertSlideR.setTargetPosition((int)power);
         runTime.reset();
         FFVar.lastError= (float) error;
     }
