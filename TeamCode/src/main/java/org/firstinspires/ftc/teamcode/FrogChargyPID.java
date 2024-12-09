@@ -335,6 +335,7 @@ public class FrogChargyPID extends OpMode {
             resetver = true;
         }
 
+
         if (currentGamepad1.square && !previousGamepad1.square && !transfering && !outtaking) {
             transfering = true;
             leftIn.setPosition(FFVar.InWait);
@@ -343,8 +344,7 @@ public class FrogChargyPID extends OpMode {
                 horSlide.setPower(-1);
             }
             if (!vertouch.isPressed()) {
-                vertSlideR.setPower(-1);
-                vertSlideL.setPower(-1);
+                FFVar.targetPosition-= 10;
             }
             // Move the arm and wrist to their positions
             outArm.setPosition(FFVar.ArmTransfer);
@@ -464,15 +464,14 @@ public class FrogChargyPID extends OpMode {
             }
 
         }
-
 // Clamp target position to safe limits
         FFVar.targetPosition = Math.max(0, Math.min(4000, FFVar.targetPosition)); // Adjust range as needed
-
 
         double currentPosition= vertSlideL.getCurrentPosition();
         double error = (float) (FFVar.targetPosition-currentPosition);
         FFVar.integralSum += (float) (error * runTime.seconds());
         double derivative = (error-FFVar.lastError)/runTime.seconds();
+
         double power = FFVar.kP*error+FFVar.kI*FFVar.integralSum+FFVar.kD*derivative;
         power = Math.max(-1, Math.min(1, power));
         vertSlideL.setPower(power);

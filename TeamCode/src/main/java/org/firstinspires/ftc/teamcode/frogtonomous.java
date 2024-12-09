@@ -15,7 +15,6 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -166,7 +165,7 @@ public class frogtonomous extends LinearOpMode{
                 return false;
             }
         }
-        public Action liftback(){
+        public Action pushreturn(){
             return new liftreturn();
         }
     }
@@ -219,59 +218,55 @@ public class frogtonomous extends LinearOpMode{
     @Override
     public void runOpMode() {//specimen hang 1.5 to 2.5k pos
         int side = 0;
-        Pose2d initialpose = new Pose2d(-8, 62, Math.toRadians(90));
+        Pose2d initialpose = new Pose2d(-10, 62, Math.toRadians(270));
         push PUSHFROGGY = new push(hardwareMap);
-        lift LIFTFROGGY = new lift(hardwareMap);
 
         MecanumDrive myBot = new MecanumDrive(hardwareMap, initialpose);
 
-        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(initialpose)
-                .lineToY(33);
-        TrajectoryActionBuilder blueside2 = blueside1.endTrajectory().fresh()
-                .splineTo(new Vector2d(-35, 40), Math.toRadians(225));
-        TrajectoryActionBuilder blueside3 = blueside2.endTrajectory().fresh()
-                .turnTo(Math.toRadians(135));
-        TrajectoryActionBuilder blueside4 = blueside3.endTrajectory().fresh()
-                .splineTo(new Vector2d(-44, 40), Math.toRadians(225));
-        TrajectoryActionBuilder blueside5 = blueside4.endTrajectory().fresh()
-                .turnTo(Math.toRadians(135));
-        TrajectoryActionBuilder blueside6 = blueside5.endTrajectory().fresh()
-                .splineTo(new Vector2d(-53, 40),Math.toRadians(225));
-        TrajectoryActionBuilder blueside7 = blueside6.endTrajectory().fresh()
-                .turnTo(Math.toRadians(135));
-        TrajectoryActionBuilder blueside8 = blueside7.endTrajectory().fresh()
-                .strafeToSplineHeading(new Vector2d(-35, 50), Math.toRadians(270))
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(62)
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(-5, 40), Math.toRadians(90))
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(33);
-        TrajectoryActionBuilder blueside9 = blueside8.endTrajectory().fresh()
-                .strafeToSplineHeading(new Vector2d(-35, 50), Math.toRadians(270))
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(62)
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(-1, 40), Math.toRadians(90))
-                .waitSeconds(0.1);
-        TrajectoryActionBuilder blueside10 = blueside9.endTrajectory().fresh()
-                .strafeToSplineHeading(new Vector2d(-35, 50), Math.toRadians(270))
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(62)
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(3, 40), Math.toRadians(90))
-                .waitSeconds(0.1);
-        TrajectoryActionBuilder blueside11 = blueside10.endTrajectory().fresh()
-                .strafeToSplineHeading(new Vector2d(-35, 50), Math.toRadians(270))
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(62)
-                .waitSeconds(0.1)
-                .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(7, 40), Math.toRadians(90))
-                .waitSeconds(0.1);
+        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(new Pose2d(-10, 62, Math.toRadians(270)))
+                .strafeToConstantHeading(new Vector2d(-25, 60))
+                .waitSeconds(1)
+                .splineTo(new Vector2d(-48, 15), Math.toRadians(90))
+                .waitSeconds(1);
+        TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-48, 15, Math.toRadians(90)))
+                .strafeToConstantHeading(new Vector2d(-57, 15))
+                .waitSeconds(1);
+        TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-10, 62, Math.toRadians(270)))
+                .splineTo(new Vector2d(-35, 50), Math.toRadians(270))
+                .lineToYConstantHeading(62);
+//                    //just repeat 5 times but cannot use for loop :(
+//                    .lineToYConstantHeading(50)
+//                    .splineTo(new Vector2d(-6, 50), Math.toRadians(90))
+//                    .lineToYConstantHeading(32);
+        //.afterDisp(60, Action2);
+
+        //move vertical slide
+
+        TrajectoryActionBuilder bluesidefirst = myBot.actionBuilder(initialpose)
+                .splineTo(new Vector2d(-35,40 ), Math.toRadians(225))
+                .waitSeconds(0.5);
+        TrajectoryActionBuilder bluesidefirstback = myBot.actionBuilder(initialpose)
+                .setTangent(Math.toRadians(135))
+                .waitSeconds(0.5);
+        TrajectoryActionBuilder bluesidesec = myBot.actionBuilder(initialpose)
+                .lineToXSplineHeading(-40, Math.toRadians(225))
+                .waitSeconds(0.5);
+        TrajectoryActionBuilder bluesidesecback = myBot.actionBuilder(initialpose)
+                .setTangent(Math.toRadians(135))
+                .waitSeconds(0.5);
+        TrajectoryActionBuilder bluesidethird = myBot.actionBuilder(initialpose)
+                .lineToXSplineHeading(-45, Math.toRadians(225))
+                .waitSeconds(0.5);
+        TrajectoryActionBuilder bluesidethirdback = myBot.actionBuilder(initialpose)
+                .setTangent(Math.toRadians(135))
+                .waitSeconds(0.5);
+
+
+        TrajectoryActionBuilder redside = myBot.actionBuilder(new Pose2d(10, -62, Math.toRadians(90)))
+                .strafeToConstantHeading(new Vector2d(25, -60))
+                .waitSeconds(0.000001)
+                .splineTo(new Vector2d(48, -15), Math.toRadians(270));
+
         while (!isStopRequested() && !opModeIsActive()) {
             telemetry.update();
         }
@@ -286,53 +281,29 @@ public class frogtonomous extends LinearOpMode{
         Action traj4 = null;
         Action traj5 = null;
         Action traj6 = null;
-        Action traj7 = null;
-        Action traj8 = null;
-        Action traj9 = null;
-        Action traj10 = null;
-        Action traj11 = null;
         if (side == 0) {
-            traj1 = blueside1.build();
-            traj2 = blueside2.build();
-            traj3 = blueside3.build();
-            traj4 = blueside4.build();
-            traj5 = blueside5.build();
-            traj6 = blueside6.build();
-            traj7 = blueside7.build();
-            traj8 = blueside8.build();
-            traj9 = blueside9.build();
-            traj10 = blueside10.build();
-            traj11 = blueside11.build();
-
+            traj1 = bluesidefirst.build();
+            traj2 = bluesidefirstback.build();
+            traj3 = bluesidesec.build();
+            traj4 = bluesidesecback.build();
+            traj5 = bluesidethird.build();
+            traj6 = bluesidethirdback.build();
         } else if (side == 1) {
-            //redside.build();
+            redside.build();
         }
 
         Actions.runBlocking(
                 new SequentialAction(
                         traj1,
-                        LIFTFROGGY.liftup(),
-                        LIFTFROGGY.liftback(),
+
                         traj2,
-                        PUSHFROGGY.pushforward(),
                         traj3,
+
                         traj4,
+
                         traj5,
-                        traj6,
-                        traj7,
-                        PUSHFROGGY.pushreturn(),
-                        traj8,
-                        LIFTFROGGY.liftup(),
-                        LIFTFROGGY.liftback(),
-                        traj9,
-                        LIFTFROGGY.liftup(),
-                        LIFTFROGGY.liftback(),
-                        traj10,
-                        LIFTFROGGY.liftup(),
-                        LIFTFROGGY.liftback(),
-                        traj11,
-                        LIFTFROGGY.liftup(),
-                        LIFTFROGGY.liftback()
+
+                        traj6
 
                 )
         );
