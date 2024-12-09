@@ -167,24 +167,29 @@ public class FrogDerpsDuoRobo extends OpMode {
 
     public void drive() {
 
+        double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
+
         boolean slow = gamepad1.options;
         double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-        double rx = gamepad1.right_trigger - gamepad1.left_trigger;
+        double rx =  (gamepad1.right_trigger - gamepad1.left_trigger) * turnvar;
+
 
         double slowvar = 2.0; // Slow mode divisor
         double speedFactor = slow ? 1 / slowvar : 1;
 
+
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
+
 
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio,
         // but only if at least one is out of the range [-1, 1]
 
-        double frontLeftPower = (y + x + rx) / denominator * speedFactor;
-        double backLeftPower = (y - x + rx) / denominator * speedFactor;
-        double frontRightPower = (y - x - rx) / denominator * speedFactor;
-        double backRightPower = (y + x - rx) / denominator * speedFactor;
+        double frontLeftPower = (y + x + rx) / denominator * speedFactor * 0.8;
+        double backLeftPower = (y - x + rx) / denominator * speedFactor * 0.8;
+        double frontRightPower = (y - x - rx) / denominator * speedFactor * 0.8;
+        double backRightPower = (y + x - rx) / denominator * speedFactor * 0.8;
 
 
         // Normalize motor powers
@@ -229,18 +234,18 @@ public class FrogDerpsDuoRobo extends OpMode {
             claw.setPosition(FFVar.ClawOpen);
         }
 
-        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) { //Intake
+        if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) { //Intake
             if (intake.getPower() < 0.2) {
                 intake.setPower(0.8);
                 intaking = false;
-            } else if (intake.getPower() > 0.2 && currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {
+            } else {
                 intake.setPower(0);
                 intaking = false;
             }
         }
 
 
-        if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) {
+        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {
             if (intake.getPower() > -0.2) {
                 intake.setPower(-0.8); // Reverse
                 intaking = true;
@@ -447,14 +452,14 @@ public class FrogDerpsDuoRobo extends OpMode {
                 limitCalculated = true; // Lock the limit while the slide is moving
             }
             if (horSlide.getCurrentPosition() > dynamicLimit) {
-                if (gamepad2.right_stick_x < 0) {
-                    horSlide.setPower(gamepad2.right_stick_x);
+                if (-gamepad2.left_stick_y < 0) {
+                    horSlide.setPower(-gamepad2.left_stick_y);
                 } else {
                     horSlide.setPower(0);
                 }
             } else {
-                horSlide.setPower(gamepad2.right_stick_x); // Horizontal slide
-                if (gamepad2.right_stick_x != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
+                horSlide.setPower(-gamepad2.left_stick_y); // Horizontal slide
+                if (-gamepad2.left_stick_y != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
                     leftIn.setPosition(FFVar.InWait);
                     rightIn.setPosition(FFVar.InWait);
                 } else if (hortouch.isPressed()) {
@@ -464,7 +469,7 @@ public class FrogDerpsDuoRobo extends OpMode {
             }
 
         }
-        if (Math.abs(gamepad2.right_stick_x) < 0.1) {
+        if (Math.abs(-gamepad2.left_stick_y) < 0.1) {
             limitCalculated = false; // Allow recalculation of the limit
         }
 // Handle vertical slide reset logic
