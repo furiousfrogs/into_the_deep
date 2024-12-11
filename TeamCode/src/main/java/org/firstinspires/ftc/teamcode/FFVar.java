@@ -31,7 +31,7 @@ public class FFVar {
     public static float WristTransfer = 0.12F;
     public static float WristOut = 0.7F;
     public static float WristWait = 0.4F;
-    public static float WristTransfer2 = 0.2F;
+    public static float WristTransfer2 = 0.1F;
 
     // PID coefficients
     public static float kP = 0.01F; // Proportional gain
