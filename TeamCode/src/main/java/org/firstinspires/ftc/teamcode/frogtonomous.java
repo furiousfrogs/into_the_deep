@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 
@@ -15,19 +16,29 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import androidx.annotation.NonNull;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
 
 @Config
 @Autonomous(name = "frogtonomous", group = "Autonomous")
 public class frogtonomous extends LinearOpMode{
+
+
+
+
     public class push {
         private TouchSensor hortouch;
+        private DcMotor spin;
+        private Servo leftintake, rightintake, armwrist, arm;
         private DcMotor horizontalslide;
+        private ElapsedTime timer = new ElapsedTime();
 
         public push(HardwareMap hardwareMap){
             horizontalslide = hardwareMap.get(DcMotor.class, "righthor");
@@ -35,45 +46,135 @@ public class frogtonomous extends LinearOpMode{
             horizontalslide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             horizontalslide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             horizontalslide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
             hortouch = hardwareMap.get(TouchSensor.class, "hortouch");
+
+            leftintake = hardwareMap.get(Servo.class, "leftin");
+            leftintake.setDirection(Servo.Direction.FORWARD);
+
+            rightintake = hardwareMap.get(Servo.class, "rightin");
+            rightintake.setDirection(Servo.Direction.FORWARD);
+
+            spin = hardwareMap.get(DcMotor.class, "intake");
+            spin.setDirection(DcMotor.Direction.FORWARD);
+            spin.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            spin.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+            //not relevant
+            armwrist = hardwareMap.get(Servo.class, "wrist");
+            armwrist.setDirection(Servo.Direction.FORWARD);
+            armwrist.setPosition(FFVar.WristOut);
+
+            arm = hardwareMap.get(Servo.class, "outarm");
+            arm.setDirection(Servo.Direction.FORWARD);
+            arm.setPosition(FFVar.ArmInit);
         }
 
-        public class pushblock implements Action{
+        public class pushset implements Action{
 
             private boolean initialized = false;
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 // powers on motor, if it is not on
                 if (!initialized) {
-                    horizontalslide.setPower(0.5);
+                    horizontalslide.setPower(0.7);
                     initialized = true;
                 }
 
                 // checks lift's current position
                 double pos = horizontalslide.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos < 1500.0) {
+                if (pos < 400.0) {
                     // true causes the action to rerun
                     return true;
                 } else {
                     // false stops action rerun
                     horizontalslide.setPower(0);
+                    leftintake.setPosition(FFVar.InDown);
+                    rightintake.setPosition(FFVar.InDown);
                     return false;
                 }
                 // overall, the action powers the lift until it surpasses
                 // 3000 encoder ticks, then powers it off
             }
         }
-        public Action pushforward() {
-            return new pushblock();
+        public Action pushsetup() {
+            return new pushset();
         }
+
+        public class pushouts implements Action{
+
+            private boolean initialized = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                // powers on motor, if it is not on
+                if (!initialized) {
+                    spin.setPower(1);
+                    timer.reset();
+                    initialized = true;
+                }
+
+                // checks lift's current position
+                double pos = horizontalslide.getCurrentPosition();
+                packet.put("liftPos", pos);
+                if (timer.seconds() < 1) {
+                    // true causes the action to rerun
+                    return true;
+                } else {
+                    // false stops action rerun
+                    spin.setPower(-1);
+                    timer.reset();
+                    return false;
+                }
+                // overall, the action powers the lift until it surpasses
+                // 3000 encoder ticks, then powers it off
+            }
+        }
+
+        public Action pushout() {
+            return new pushouts();
+        }
+
+        public class Pushforward implements Action {
+            private boolean initialized = false;
+
+
+
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+
+                if (!initialized) {
+                    horizontalslide.setPower(0.7);
+                    spin.setPower(-1);
+                    initialized = true;
+                }
+
+
+                double pos = horizontalslide.getCurrentPosition();
+                packet.put("liftPos", pos);
+                if (pos < 900.0) {
+                    return true;
+                } else {
+                    horizontalslide.setPower(0);
+                    return false;
+                }
+            }
+        }
+
+        public Action pushtake() {return new Pushforward();}
         public class PushDown implements Action {
             private boolean initialized = false;
+
+
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    horizontalslide.setPower(-0.5);
+                    horizontalslide.setPower(-1);
+                    leftintake.setPosition(FFVar.InUp);
+                    rightintake.setPosition(FFVar.InUp);
+                    spin.setPower(0);
                     initialized = true;
                 }
 
@@ -86,6 +187,7 @@ public class frogtonomous extends LinearOpMode{
                 return false;
             }
         }
+
         public Action pushreturn(){
             return new PushDown();
         }
@@ -97,13 +199,13 @@ public class frogtonomous extends LinearOpMode{
 
         public lift(HardwareMap hardwareMap){
             verticalslideL = hardwareMap.get(DcMotor.class, "leftvertical");
-            verticalslideL.setDirection(DcMotor.Direction.REVERSE);
+            verticalslideL.setDirection(DcMotor.Direction.FORWARD);
             verticalslideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             verticalslideL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             verticalslideL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             verticalslideR = hardwareMap.get(DcMotor.class, "rightvertical");
-            verticalslideR.setDirection(DcMotor.Direction.FORWARD);
+            verticalslideR.setDirection(DcMotor.Direction.REVERSE);
             verticalslideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             verticalslideR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             verticalslideR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -118,8 +220,8 @@ public class frogtonomous extends LinearOpMode{
             public boolean run(@NonNull TelemetryPacket packet) {
                 // powers on motor, if it is not on
                 if (!initialized) {
-                    verticalslideL.setPower(0.5);
-                    verticalslideR.setPower(0.5);
+                    verticalslideL.setPower(1);
+                    verticalslideR.setPower(1);
                     initialized = true;
                 }
 
@@ -128,7 +230,7 @@ public class frogtonomous extends LinearOpMode{
                 double pos2 = verticalslideR.getCurrentPosition();
                 double pos = (pos1+pos2)/2;
                 packet.put("liftPos", pos);
-                if (pos < 2500.0) {
+                if (pos < 2250.0) {
                     // true causes the action to rerun
                     return true;
                 } else {
@@ -144,14 +246,48 @@ public class frogtonomous extends LinearOpMode{
         public Action liftup() {
             return new liftblock();
         }
+        public class liftwall implements Action{
+
+            private boolean initialized = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                // powers on motor, if it is not on
+                if (!initialized) {
+                    verticalslideL.setPower(1);
+                    verticalslideR.setPower(1);
+                    initialized = true;
+                }
+
+                // checks lift's current position
+                double pos1 = verticalslideL.getCurrentPosition();
+                double pos2 = verticalslideR.getCurrentPosition();
+                double pos = (pos1+pos2)/2;
+                packet.put("liftPos", pos);
+                if (pos < 500.0) {
+                    // true causes the action to rerun
+                    return true;
+                } else {
+                    // false stops action rerun
+                    verticalslideL.setPower(0);
+                    verticalslideR.setPower(0);
+                    return false;
+                }
+                // overall, the action powers the lift until it surpasses
+                // 3000 encoder ticks, then powers it off
+            }
+        }
+
+        public Action liftfromwall(){
+            return new liftwall();
+        }
         public class liftreturn implements Action {
             private boolean initialized = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    verticalslideL.setPower(-0.5);
-                    verticalslideR.setPower(-0.5);
+                    verticalslideL.setPower(-1);
+                    verticalslideR.setPower(-1);
                     initialized = true;
                 }
 
@@ -165,7 +301,7 @@ public class frogtonomous extends LinearOpMode{
                 return false;
             }
         }
-        public Action pushreturn(){
+        public Action liftback(){
             return new liftreturn();
         }
     }
@@ -218,54 +354,57 @@ public class frogtonomous extends LinearOpMode{
     @Override
     public void runOpMode() {//specimen hang 1.5 to 2.5k pos
         int side = 0;
-        Pose2d initialpose = new Pose2d(-10, 62, Math.toRadians(270));
+        Pose2d initialpose = new Pose2d(-8, 62, Math.toRadians(90));
         push PUSHFROGGY = new push(hardwareMap);
+        lift LIFTFROGGY = new lift(hardwareMap);
+
 
         MecanumDrive myBot = new MecanumDrive(hardwareMap, initialpose);
 
-        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(new Pose2d(-10, 62, Math.toRadians(270)))
-                .strafeToConstantHeading(new Vector2d(-25, 60))
-                .waitSeconds(1)
-                .splineTo(new Vector2d(-48, 15), Math.toRadians(90))
-                .waitSeconds(1);
-        TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-48, 15, Math.toRadians(90)))
-                .strafeToConstantHeading(new Vector2d(-57, 15))
-                .waitSeconds(1);
-        TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-10, 62, Math.toRadians(270)))
-                .splineTo(new Vector2d(-35, 50), Math.toRadians(270))
-                .lineToYConstantHeading(62);
-//                    //just repeat 5 times but cannot use for loop :(
-//                    .lineToYConstantHeading(50)
-//                    .splineTo(new Vector2d(-6, 50), Math.toRadians(90))
-//                    .lineToYConstantHeading(32);
-        //.afterDisp(60, Action2);
+        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(initialpose)
+                .lineToY(36)
+                .waitSeconds(0.1);
+        TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-8, 36, Math.toRadians(90)))
+                .lineToY(33)
+                .waitSeconds(0.1);
 
-        //move vertical slide
+        TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 33, Math.toRadians(90)))
+                .splineTo(new Vector2d(-30, 40), Math.toRadians(220));
+        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-35, 40, Math.toRadians(225)))
+                .turnTo(Math.toRadians(120));
+        TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-35, 40, Math.toRadians(135)))
+                .splineTo(new Vector2d(-40, 40), Math.toRadians(220));
+        TrajectoryActionBuilder blueside6 = myBot.actionBuilder(new Pose2d(-40, 40, Math.toRadians(225)))
+                .turnTo(Math.toRadians(120));
+        TrajectoryActionBuilder blueside7 = myBot.actionBuilder(new Pose2d(-44, 40,Math.toRadians(135)))
+                .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
+                .waitSeconds(0.1)
+                .lineToYConstantHeading(64);
+        TrajectoryActionBuilder blueside8 = myBot.actionBuilder(new Pose2d(-40, 64, Math.toRadians(270)))
+                .lineToYConstantHeading(50)
+                .strafeToSplineHeading(new Vector2d(-5, 36), Math.toRadians(90));
+        TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(-5, 36, Math.toRadians(90)))
+                .lineToYConstantHeading(33);
+        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-5, 33, Math.toRadians(90)))
+                .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
+                .waitSeconds(0.1)
+                .lineToYConstantHeading(64);
+        TrajectoryActionBuilder blueside11 = myBot.actionBuilder(new Pose2d(-40, 64, Math.toRadians(90)))
+                .lineToYConstantHeading(50)
+                .strafeToSplineHeading(new Vector2d(-1, 36), Math.toRadians(90));
+        TrajectoryActionBuilder blueside12 = myBot.actionBuilder(new Pose2d(-1, 36, Math.toRadians(90)))
+                .lineToYConstantHeading(33);
+        TrajectoryActionBuilder blueside13 = myBot.actionBuilder(new Pose2d(-1, 32, Math.toRadians(90)))
+                .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
+                .waitSeconds(0.1)
+                .lineToYConstantHeading(64);
+        TrajectoryActionBuilder blueside14 = myBot.actionBuilder(new Pose2d(-40, 64, Math.toRadians(270)))
+                .lineToYConstantHeading(50)
+                .strafeToSplineHeading(new Vector2d(3, 36), Math.toRadians(90));
+        TrajectoryActionBuilder blueside15 = myBot.actionBuilder(new Pose2d(3, 36, Math.toRadians(90)))
+                .lineToYConstantHeading(33);
 
-        TrajectoryActionBuilder bluesidefirst = myBot.actionBuilder(initialpose)
-                .splineTo(new Vector2d(-35,40 ), Math.toRadians(225))
-                .waitSeconds(0.5);
-        TrajectoryActionBuilder bluesidefirstback = myBot.actionBuilder(initialpose)
-                .setTangent(Math.toRadians(135))
-                .waitSeconds(0.5);
-        TrajectoryActionBuilder bluesidesec = myBot.actionBuilder(initialpose)
-                .lineToXSplineHeading(-40, Math.toRadians(225))
-                .waitSeconds(0.5);
-        TrajectoryActionBuilder bluesidesecback = myBot.actionBuilder(initialpose)
-                .setTangent(Math.toRadians(135))
-                .waitSeconds(0.5);
-        TrajectoryActionBuilder bluesidethird = myBot.actionBuilder(initialpose)
-                .lineToXSplineHeading(-45, Math.toRadians(225))
-                .waitSeconds(0.5);
-        TrajectoryActionBuilder bluesidethirdback = myBot.actionBuilder(initialpose)
-                .setTangent(Math.toRadians(135))
-                .waitSeconds(0.5);
 
-
-        TrajectoryActionBuilder redside = myBot.actionBuilder(new Pose2d(10, -62, Math.toRadians(90)))
-                .strafeToConstantHeading(new Vector2d(25, -60))
-                .waitSeconds(0.000001)
-                .splineTo(new Vector2d(48, -15), Math.toRadians(270));
 
         while (!isStopRequested() && !opModeIsActive()) {
             telemetry.update();
@@ -275,35 +414,81 @@ public class frogtonomous extends LinearOpMode{
 
         if (isStopRequested()) return;
 
+
         Action traj1 = null;
         Action traj2 = null;
         Action traj3 = null;
         Action traj4 = null;
         Action traj5 = null;
         Action traj6 = null;
+        Action traj7 = null;
+        Action traj8 = null;
+        Action traj9 = null;
+        Action traj10 = null;
+        Action traj11 = null;
+        Action traj12 = null;
+        Action traj13 = null;
+        Action traj14 = null;
+        Action traj15 = null;
+
         if (side == 0) {
-            traj1 = bluesidefirst.build();
-            traj2 = bluesidefirstback.build();
-            traj3 = bluesidesec.build();
-            traj4 = bluesidesecback.build();
-            traj5 = bluesidethird.build();
-            traj6 = bluesidethirdback.build();
+            traj1 = blueside1.build();
+            traj2 = blueside2.build();
+            traj3 = blueside3.build();
+            traj4 = blueside4.build();
+            traj5 = blueside5.build();
+            traj6 = blueside6.build();
+            traj7 = blueside7.build();
+            traj8 = blueside8.build();
+            traj9 = blueside9.build();
+            traj10 = blueside10.build();
+            traj11 = blueside11.build();
+            traj12 = blueside10.build();
+            traj13 = blueside11.build();
+            traj14 = blueside10.build();
+            traj15 = blueside11.build();
+
         } else if (side == 1) {
-            redside.build();
+            //redside.build();
         }
+
+        //new SleepAction(1),
 
         Actions.runBlocking(
                 new SequentialAction(
                         traj1,
-
+                        LIFTFROGGY.liftup(),
                         traj2,
+                        LIFTFROGGY.liftback(),
+                        //2spec? here
+                        traj6,
+                        PUSHFROGGY.pushsetup(),
+                        PUSHFROGGY.pushtake(),
                         traj3,
-
+                        PUSHFROGGY.pushout(),
                         traj4,
-
                         traj5,
-
-                        traj6
+                        PUSHFROGGY.pushout(),
+                        PUSHFROGGY.pushreturn(),
+                        traj6,
+                        traj7,
+                        LIFTFROGGY.liftfromwall(),
+                        traj8,
+                        LIFTFROGGY.liftup(),
+                        traj9,
+                        LIFTFROGGY.liftback(),
+                        traj10,
+                        LIFTFROGGY.liftfromwall(),
+                        traj11,
+                        LIFTFROGGY.liftup(),
+                        traj12,
+                        LIFTFROGGY.liftback(),
+                        traj13,
+                        LIFTFROGGY.liftfromwall(),
+                        traj14,
+                        LIFTFROGGY.liftup(),
+                        traj15,
+                        LIFTFROGGY.liftback()
 
                 )
         );
