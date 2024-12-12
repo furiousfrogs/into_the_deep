@@ -16,8 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.FFVar;
 
-@TeleOp(name = "FrogDerpsDuoRobo", group= "TeleOp")
-public class FrogDerpsDuoRobo extends OpMode {
+@TeleOp(name = "FrogDerpsDuoLeon", group= "TeleOp")
+public class FrogDerpsDuoLeon extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
@@ -230,7 +230,7 @@ public class FrogDerpsDuoRobo extends OpMode {
             claw.setPosition(FFVar.ClawOpen);
         }
 
-        if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) { //Intake
+        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) { //Intake
             if (intake.getPower() < 0.2) {
                 intake.setPower(0.8);
                 intaking = false;
@@ -241,7 +241,7 @@ public class FrogDerpsDuoRobo extends OpMode {
         }
 
 
-        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {
+        if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) {
             if (intake.getPower() > -0.2) {
                 intake.setPower(-0.8); // Reverse
                 intaking = true;
@@ -448,14 +448,14 @@ public class FrogDerpsDuoRobo extends OpMode {
                 limitCalculated = true; // Lock the limit while the slide is moving
             }
             if (horSlide.getCurrentPosition() > dynamicLimit) {
-                if (-gamepad2.right_stick_y < 0) {
-                    horSlide.setPower(-gamepad2.right_stick_y);
+                if (-gamepad2.left_stick_x < 0) {
+                    horSlide.setPower(-gamepad2.left_stick_x);
                 } else {
                     horSlide.setPower(0);
                 }
             } else {
-                horSlide.setPower(-gamepad2.right_stick_y); // Horizontal slide
-                if (-gamepad2.right_stick_y != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
+                horSlide.setPower(-gamepad2.left_stick_x); // Horizontal slide
+                if (-gamepad2.left_stick_x != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
                     leftIn.setPosition(FFVar.InWait);
                     rightIn.setPosition(FFVar.InWait);
                 } else if (hortouch.isPressed()) {
@@ -465,7 +465,7 @@ public class FrogDerpsDuoRobo extends OpMode {
             }
 
         }
-        if (Math.abs(-gamepad2.right_stick_y) < 0.1) {
+        if (Math.abs(-gamepad2.left_stick_x) < 0.1) {
             limitCalculated = false; // Allow recalculation of the limit
         }
 // Handle vertical slide reset logic
