@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 // RR-specific imports
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 
@@ -17,8 +15,6 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -26,12 +22,10 @@ import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
-import java.util.Arrays;
-
 
 @Config
-@Autonomous(name = "frogtonomousblue", group = "Autonomous")
-public class frogtonomousblue extends LinearOpMode{
+@Autonomous(name = "frogtonomousblue2(fast)", group = "Autonomous")
+public class frogtonomousblue2 extends LinearOpMode{
 
     public class push {
         private TouchSensor hortouch;
@@ -370,19 +364,14 @@ public class frogtonomousblue extends LinearOpMode{
                 .strafeToConstantHeading(new Vector2d(-4, 36));
         TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-4, 36, Math.toRadians(90)))
                 .lineToY(32);
-
         TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 32, Math.toRadians(90)))
                 .splineTo(new Vector2d(-30, 40), Math.toRadians(212));
-
         TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(212)))
                 .turnTo(Math.toRadians(120));
-
         TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(135)))
-                .splineTo(new Vector2d(-37, 40), Math.toRadians(208))
-                ;
+                .splineTo(new Vector2d(-37, 40), Math.toRadians(208));
         TrajectoryActionBuilder blueside6 = myBot.actionBuilder(new Pose2d(-37, 40, Math.toRadians(208)))
-                .turnTo(Math.toRadians(120))
-                ;
+                .turnTo(Math.toRadians(120));
         TrajectoryActionBuilder blueside7 = myBot.actionBuilder(new Pose2d(-44, 40,Math.toRadians(135)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
@@ -479,22 +468,30 @@ public class frogtonomousblue extends LinearOpMode{
                         PUSHFROGGY.pushreturn(),
                         traj7,
                         LIFTFROGGY.liftfromwall(),
-                        traj8,
-                        LIFTFROGGY.liftup(),
+                        new ParallelAction(
+                                traj8,
+                                new SequentialAction(
+                                        LIFTFROGGY.liftup()
+                                )
+                        ),
                         traj9,
                         LIFTFROGGY.liftback(),
                         traj10,
                         LIFTFROGGY.liftfromwall() ,
-                        traj11,
-                        LIFTFROGGY.liftup(),
+                        new ParallelAction(
+                                traj11,
+                                new SequentialAction(
+                                        LIFTFROGGY.liftup()
+                                )
+                        ),
                         traj12,
                         LIFTFROGGY.liftback(),
-                        traj13,
-                        LIFTFROGGY.liftfromwall(),
-                        traj14,
-                        LIFTFROGGY.liftup(),
-                        traj15,
-                        LIFTFROGGY.liftback()
+                        traj13
+//                        LIFTFROGGY.liftfromwall(),
+//                        traj14,
+//                        LIFTFROGGY.liftup(),
+//                        traj15,
+//                        LIFTFROGGY.liftback()
 
                 )
         );
