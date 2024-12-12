@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Auto;
 
 // RR-specific imports
 
@@ -21,10 +21,16 @@ import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
+import org.firstinspires.ftc.teamcode.FFVar;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
+
 
 @Config
-@Autonomous(name = "frogtonomousblue", group = "Autonomous")
-public class frogtonomousblue extends LinearOpMode{
+@Autonomous(name = "frogtonomous", group = "Autonomous")
+public class frogtonomous extends LinearOpMode{
+
+
+
 
     public class push {
         private TouchSensor hortouch;
@@ -44,11 +50,9 @@ public class frogtonomousblue extends LinearOpMode{
 
             leftintake = hardwareMap.get(Servo.class, "leftin");
             leftintake.setDirection(Servo.Direction.FORWARD);
-            leftintake.setPosition(FFVar.InUp);
 
             rightintake = hardwareMap.get(Servo.class, "rightin");
             rightintake.setDirection(Servo.Direction.FORWARD);
-            rightintake.setPosition(FFVar.InUp);
 
             spin = hardwareMap.get(DcMotor.class, "intake");
             spin.setDirection(DcMotor.Direction.FORWARD);
@@ -112,7 +116,7 @@ public class frogtonomousblue extends LinearOpMode{
                 // checks lift's current position
                 double pos = horizontalslide.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (timer.seconds() < 0.5) {
+                if (timer.seconds() < 1) {
                     // true causes the action to rerun
                     return true;
                 } else {
@@ -148,7 +152,7 @@ public class frogtonomousblue extends LinearOpMode{
 
                 double pos = horizontalslide.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos < 930.0) {
+                if (pos < 900.0) {
                     return true;
                 } else {
                     horizontalslide.setPower(0);
@@ -225,7 +229,7 @@ public class frogtonomousblue extends LinearOpMode{
                 double pos2 = verticalslideR.getCurrentPosition();
                 double pos = (pos1+pos2)/2;
                 packet.put("liftPos", pos);
-                if (pos < 2060.0) {
+                if (pos < 2250.0) {
                     // true causes the action to rerun
                     return true;
                 } else {
@@ -349,60 +353,56 @@ public class frogtonomousblue extends LinearOpMode{
     @Override
     public void runOpMode() {//specimen hang 1.5 to 2.5k pos
         int side = 0;
-
+        Pose2d initialpose = new Pose2d(-8, 62, Math.toRadians(90));
         push PUSHFROGGY = new push(hardwareMap);
         lift LIFTFROGGY = new lift(hardwareMap);
 
-        MecanumDrive myBot = new MecanumDrive(hardwareMap, new Pose2d(-8, 62, Math.toRadians(90)));
 
+        MecanumDrive myBot = new MecanumDrive(hardwareMap, initialpose);
 
+        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(initialpose)
+                .lineToY(36)
+                .waitSeconds(0.1);
+        TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-8, 36, Math.toRadians(90)))
+                .lineToY(33)
+                .waitSeconds(0.1);
 
-
-
-        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(new Pose2d(-8, 62, Math.toRadians(90)))
-                .strafeToConstantHeading(new Vector2d(-4, 36));
-        TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-4, 36, Math.toRadians(90)))
-                .lineToY(32);
-
-        TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 32, Math.toRadians(90)))
-                .splineTo(new Vector2d(-30, 40), Math.toRadians(212));
-
-        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(212)))
+        TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 33, Math.toRadians(90)))
+                .splineTo(new Vector2d(-30, 40), Math.toRadians(220));
+        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-35, 40, Math.toRadians(225)))
                 .turnTo(Math.toRadians(120));
-
-        TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(135)))
-                .splineTo(new Vector2d(-37, 40), Math.toRadians(208))
-                ;
-        TrajectoryActionBuilder blueside6 = myBot.actionBuilder(new Pose2d(-37, 40, Math.toRadians(208)))
-                .turnTo(Math.toRadians(120))
-                ;
+        TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-35, 40, Math.toRadians(135)))
+                .splineTo(new Vector2d(-40, 40), Math.toRadians(220));
+        TrajectoryActionBuilder blueside6 = myBot.actionBuilder(new Pose2d(-40, 40, Math.toRadians(225)))
+                .turnTo(Math.toRadians(120));
         TrajectoryActionBuilder blueside7 = myBot.actionBuilder(new Pose2d(-44, 40,Math.toRadians(135)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
-                .lineToYConstantHeading(67);
-        TrajectoryActionBuilder blueside8 = myBot.actionBuilder(new Pose2d(-40, 67, Math.toRadians(270)))
+                .lineToYConstantHeading(64);
+        TrajectoryActionBuilder blueside8 = myBot.actionBuilder(new Pose2d(-40, 64, Math.toRadians(270)))
                 .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(-3, 36), Math.toRadians(90) );
-        TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(-3, 36, Math.toRadians(90)))
-                .lineToYConstantHeading(28);
-        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-3, 28, Math.toRadians(90)))
+                .strafeToSplineHeading(new Vector2d(-5, 36), Math.toRadians(90));
+        TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(-5, 36, Math.toRadians(90)))
+                .lineToYConstantHeading(33);
+        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-5, 33, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
-                .lineToYConstantHeading(66);
-        TrajectoryActionBuilder blueside11 = myBot.actionBuilder(new Pose2d(-40, 66, Math.toRadians(270)))
+                .lineToYConstantHeading(64);
+        TrajectoryActionBuilder blueside11 = myBot.actionBuilder(new Pose2d(-40, 64, Math.toRadians(90)))
                 .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(1, 36), Math.toRadians(90));
+                .strafeToSplineHeading(new Vector2d(-1, 36), Math.toRadians(90));
         TrajectoryActionBuilder blueside12 = myBot.actionBuilder(new Pose2d(-1, 36, Math.toRadians(90)))
-                .lineToYConstantHeading(28);
-        TrajectoryActionBuilder blueside13 = myBot.actionBuilder(new Pose2d(-1, 28, Math.toRadians(90)))
+                .lineToYConstantHeading(33);
+        TrajectoryActionBuilder blueside13 = myBot.actionBuilder(new Pose2d(-1, 32, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
-                .lineToYConstantHeading(65);
-        TrajectoryActionBuilder blueside14 = myBot.actionBuilder(new Pose2d(-40, 65, Math.toRadians(270)))
+                .lineToYConstantHeading(64);
+        TrajectoryActionBuilder blueside14 = myBot.actionBuilder(new Pose2d(-40, 64, Math.toRadians(270)))
                 .lineToYConstantHeading(50)
                 .strafeToSplineHeading(new Vector2d(3, 36), Math.toRadians(90));
         TrajectoryActionBuilder blueside15 = myBot.actionBuilder(new Pose2d(3, 36, Math.toRadians(90)))
                 .lineToYConstantHeading(33);
+
 
 
         while (!isStopRequested() && !opModeIsActive()) {
@@ -430,22 +430,26 @@ public class frogtonomousblue extends LinearOpMode{
         Action traj14 = null;
         Action traj15 = null;
 
+        if (side == 0) {
+            traj1 = blueside1.build();
+            traj2 = blueside2.build();
+            traj3 = blueside3.build();
+            traj4 = blueside4.build();
+            traj5 = blueside5.build();
+            traj6 = blueside6.build();
+            traj7 = blueside7.build();
+            traj8 = blueside8.build();
+            traj9 = blueside9.build();
+            traj10 = blueside10.build();
+            traj11 = blueside11.build();
+            traj12 = blueside10.build();
+            traj13 = blueside11.build();
+            traj14 = blueside10.build();
+            traj15 = blueside11.build();
 
-        traj1 = blueside1.build();
-        traj2 = blueside2.build();
-        traj3 = blueside3.build();
-        traj4 = blueside4.build();
-        traj5 = blueside5.build();
-        traj6 = blueside6.build();
-        traj7 = blueside7.build();
-        traj8 = blueside8.build();
-        traj9 = blueside9.build();
-        traj10 = blueside10.build();
-        traj11 = blueside11.build();
-        traj12 = blueside12.build();
-        traj13 = blueside13.build();
-        traj14 = blueside14.build();
-        traj15 = blueside15.build();
+        } else if (side == 1) {
+            //redside.build();
+        }
 
         //new SleepAction(1),
 
@@ -455,17 +459,17 @@ public class frogtonomousblue extends LinearOpMode{
                         LIFTFROGGY.liftup(),
                         traj2,
                         LIFTFROGGY.liftback(),
-
-                        PUSHFROGGY.pushsetup(),
                         //2spec? here
-                        traj3,
-                        PUSHFROGGY.pushtake(),
-                        traj4,
-                        PUSHFROGGY.pushout(),
-                        traj5,
                         traj6,
+                        PUSHFROGGY.pushsetup(),
+                        PUSHFROGGY.pushtake(),
+                        traj3,
+                        PUSHFROGGY.pushout(),
+                        traj4,
+                        traj5,
                         PUSHFROGGY.pushout(),
                         PUSHFROGGY.pushreturn(),
+                        traj6,
                         traj7,
                         LIFTFROGGY.liftfromwall(),
                         traj8,
@@ -473,7 +477,7 @@ public class frogtonomousblue extends LinearOpMode{
                         traj9,
                         LIFTFROGGY.liftback(),
                         traj10,
-                        LIFTFROGGY.liftfromwall() ,
+                        LIFTFROGGY.liftfromwall(),
                         traj11,
                         LIFTFROGGY.liftup(),
                         traj12,

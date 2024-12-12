@@ -1,14 +1,12 @@
-package org.firstinspires.ftc.teamcode;
-import android.drm.DrmStore;
+package org.firstinspires.ftc.teamcode.ScrimArchive;
 
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;//importing libraries
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -17,11 +15,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
-import org.firstinspires.ftc.robotcore.internal.webserver.websockets.InternalWebSocketCommandException;
+import org.firstinspires.ftc.teamcode.FFVar;
 
-@TeleOp(name = "FrogDerpsDuoRobo", group= "TeleOp")
-public class FrogDerpsDuoRobo extends OpMode {
+@Disabled
+@TeleOp(name = "FrogChargyPID", group= "TeleOp")
+public class FrogChargyPID extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
@@ -45,6 +43,7 @@ public class FrogDerpsDuoRobo extends OpMode {
 
     boolean OuttakeAction2 = false;
     private ElapsedTime OuttakeTimer2 = new ElapsedTime();
+    private ElapsedTime runTime= new ElapsedTime();
 
     private int dynamicLimit = 1300;
     private boolean limitCalculated = false;
@@ -62,9 +61,6 @@ public class FrogDerpsDuoRobo extends OpMode {
     boolean intaking = false;
     Gamepad currentGamepad1;
     Gamepad previousGamepad1;
-    Gamepad currentGamepad2;
-    Gamepad previousGamepad2;
-
 
 
 
@@ -143,11 +139,8 @@ public class FrogDerpsDuoRobo extends OpMode {
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        currentGamepad2 = new Gamepad();
-        previousGamepad2 = new Gamepad();
         currentGamepad1 = new Gamepad();
         previousGamepad1 = new Gamepad();
-
         hortouch = hardwareMap.get(TouchSensor.class, "hortouch");
         vertouch = hardwareMap.get(TouchSensor.class, "vertouch");
         coloursensor = hardwareMap.get(ColorRangeSensor.class, "coloursensor");
@@ -166,30 +159,27 @@ public class FrogDerpsDuoRobo extends OpMode {
 
 
     public void drive() {
+        if (gamepad1.options) {
+            imu.resetYaw();
+        }
 
         double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
 
-        boolean slow = gamepad1.options;
-        double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-        double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-        double rx =  (gamepad1.right_trigger - gamepad1.left_trigger) / turnvar;
+        double y = -gamepad1.left_stick_y;
+        double x = gamepad1.left_stick_x;
+        double rx = (gamepad1.right_trigger - gamepad1.left_trigger)/turnvar;
 
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double rotX = (x) * Math.cos(-botHeading) - (y) * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        double slowvar = 2.0; // Slow mode divisor
-        double speedFactor = slow ? 1 / slowvar : 1;
+        rotX = rotX * 1.1;
 
-
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
-
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-
-        double frontLeftPower = (y + x + rx) / denominator * speedFactor * 0.8;
-        double backLeftPower = (y - x + rx) / denominator * speedFactor * 0.8;
-        double frontRightPower = (y - x - rx) / denominator * speedFactor * 0.8;
-        double backRightPower = (y + x - rx) / denominator * speedFactor * 0.8;
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
 
 
         // Normalize motor powers
@@ -204,7 +194,7 @@ public class FrogDerpsDuoRobo extends OpMode {
         if (vertSlideL.getCurrentPosition() > 2000) {
             frontLeftPower = frontLeftPower/2;
             frontRightPower = frontRightPower/2;
-            backLeftPower = backLeftPower/2; 
+            backLeftPower = backLeftPower/2;
             backRightPower = backRightPower/2;
         }
         // Set motor powers
@@ -213,6 +203,7 @@ public class FrogDerpsDuoRobo extends OpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
     }
+
     public void manualTake() {
         //manual controls
         int red = coloursensor.red();
@@ -223,31 +214,26 @@ public class FrogDerpsDuoRobo extends OpMode {
         // Update current state with the latest gamepad data
         currentGamepad1.copy(gamepad1);
 
-        // Store previous state
-        previousGamepad2.copy(currentGamepad2);
-        // Update current state with the latest gamepad data
-        currentGamepad2.copy(gamepad2);
-
-        if (gamepad2.options && !intaking && !outtaking) {
+        if (gamepad1.options && !intaking && !outtaking) {
             outArm.setPosition(FFVar.ArmOut);
             wrist.setPosition(FFVar.WristOut);
             claw.setPosition(FFVar.ClawOpen);
         }
 
-        if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) { //Intake
+        if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) { //Intake
             if (intake.getPower() < 0.2) {
                 intake.setPower(0.8);
                 intaking = false;
-            } else {
+            } else if (intake.getPower() > 0.2 && currentGamepad1.right_bumper && !previousGamepad1.right_bumper) {
                 intake.setPower(0);
                 intaking = false;
             }
         }
 
 
-        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {
+        if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
             if (intake.getPower() > -0.2) {
-                intake.setPower(-0.8); // Reverse
+                intake.setPower(-1); // Reverse
                 intaking = true;
             } else {
                 intake.setPower(0); // Stop
@@ -271,7 +257,7 @@ public class FrogDerpsDuoRobo extends OpMode {
         }
 
 
-        if (currentGamepad2.cross && !previousGamepad2.cross && !transfering) { // Arm down
+        if (currentGamepad1.cross && !previousGamepad1.cross && !transfering) { // Arm down
             if (leftIn.getPosition() > 0.5) {
                 // Set servo positions to ArmDwn
                 leftIn.setPosition(FFVar.InWait);
@@ -294,6 +280,7 @@ public class FrogDerpsDuoRobo extends OpMode {
         if (vertouch.isPressed()) { //Reset vertical encoders
             vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             vertSlideL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            FFVar.targetPosition=0;
             vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             vertSlideR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
@@ -303,7 +290,7 @@ public class FrogDerpsDuoRobo extends OpMode {
             rightIn.setPosition(FFVar.InWait);
         }
 
-        if (currentGamepad2.circle && !previousGamepad2.circle && sample) {
+        if (currentGamepad1.circle && !previousGamepad1.circle && sample && !transfering) {
             outtaking = true;
             // Start the Outtake action
             outArm.setPosition(FFVar.ArmOut2);
@@ -336,33 +323,27 @@ public class FrogDerpsDuoRobo extends OpMode {
             }
         }
 
-        if ((currentGamepad2.triangle && !previousGamepad2.triangle) || (currentGamepad1.square && !previousGamepad1.square)) {
+        if (currentGamepad1.triangle && !previousGamepad1.triangle) {
             if (!hortouch.isPressed()) {
                 horSlide.setPower(-1);
             }
             if (!vertouch.isPressed()) {
-                vertSlideR.setPower(-1);
-                vertSlideL.setPower(-1);
+                FFVar.targetPosition=0;
             }
             resethor = true;
             resetver = true;
         }
 
-        if (((currentGamepad2.square && !previousGamepad2.square) || (currentGamepad1.square && !previousGamepad1.square))  && !transfering && !outtaking) {
+
+        if (currentGamepad1.square && !previousGamepad1.square && !transfering && !outtaking) {
             transfering = true;
-            if (horSlide.getCurrentPosition() >= 350) {
-                leftIn.setPosition(FFVar.InWait);
-                rightIn.setPosition(FFVar.InWait);
-            } else {
-                leftIn.setPosition(FFVar.InWait2);
-                rightIn.setPosition(FFVar.InWait2);
-            }
+            leftIn.setPosition(FFVar.InWait);
+            rightIn.setPosition(FFVar.InWait);
             if (!hortouch.isPressed()) {
                 horSlide.setPower(-1);
             }
             if (!vertouch.isPressed()) {
-                vertSlideR.setPower(-1);
-                vertSlideL.setPower(-1);
+                FFVar.targetPosition-= 10;
             }
             // Move the arm and wrist to their positions
             outArm.setPosition(FFVar.ArmTransfer);
@@ -384,11 +365,9 @@ public class FrogDerpsDuoRobo extends OpMode {
         if (Transfer1action) {
             if (hortouch.isPressed() && vertouch.isPressed() && Transfer1Timer.seconds() > FFVar.TransferATime) {
 
+                // Set the positions for leftIn and rightIn after delay
                 leftIn.setPosition(FFVar.InTransfer);
                 rightIn.setPosition(FFVar.InTransfer);
-
-                // Set the positions for leftIn and rightIn after delay
-
 
                 Transfer2action = true;
                 Transfer2Timer.reset();
@@ -452,14 +431,14 @@ public class FrogDerpsDuoRobo extends OpMode {
                 limitCalculated = true; // Lock the limit while the slide is moving
             }
             if (horSlide.getCurrentPosition() > dynamicLimit) {
-                if (-gamepad2.right_stick_y < 0) {
-                    horSlide.setPower(-gamepad2.right_stick_y);
+                if (gamepad1.right_stick_x < 0) {
+                    horSlide.setPower(gamepad1.right_stick_x);
                 } else {
                     horSlide.setPower(0);
                 }
             } else {
-                horSlide.setPower(-gamepad2.right_stick_y); // Horizontal slide
-                if (-gamepad2.right_stick_y != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
+                horSlide.setPower(gamepad1.right_stick_x); // Horizontal slide
+                if (gamepad1.right_stick_x != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
                     leftIn.setPosition(FFVar.InWait);
                     rightIn.setPosition(FFVar.InWait);
                 } else if (hortouch.isPressed()) {
@@ -469,37 +448,35 @@ public class FrogDerpsDuoRobo extends OpMode {
             }
 
         }
-        if (Math.abs(-gamepad2.right_stick_y) < 0.1) {
+        if (Math.abs(gamepad1.right_stick_x) < 0.1) {
             limitCalculated = false; // Allow recalculation of the limit
         }
 // Handle vertical slide reset logic
 
         if (!resetver && !transfering) {
             if (vertSlideR.getCurrentPosition() > 4000) {
-                if (gamepad2.left_stick_y > 0) {
-                    vertSlideL.setPower(-gamepad2.left_stick_y); // Vertical slide
-                    vertSlideR.setPower(-gamepad2.left_stick_y);
-                } else {
-                    vertSlideL.setPower(0); // Vertical slide
-                    vertSlideR.setPower(0);
+                if (gamepad1.right_stick_y > 0) {
+                    FFVar.targetPosition+=100; // Vertical slide
+                } else if (gamepad1.right_stick_y<0) {
+                    FFVar.targetPosition-=100;
                 }
-            } else {
-                vertSlideL.setPower(-gamepad2.left_stick_y); // Vertical slide
-                vertSlideR.setPower(-gamepad2.left_stick_y);
             }
 
         }
-
-
-
-        if (gamepad1.dpad_up) {
-            FFVar.targetPosition += 100; // Move up by 100 encoder ticks
-        } else if (gamepad1.dpad_down) {
-            FFVar.targetPosition -= 100; // Move down by 100 encoder ticks
-        }
-
 // Clamp target position to safe limits
         FFVar.targetPosition = Math.max(0, Math.min(4000, FFVar.targetPosition)); // Adjust range as needed
+
+        double currentPosition= vertSlideL.getCurrentPosition();
+        double error = (float) (FFVar.targetPosition-currentPosition);
+        FFVar.integralSum += (float) (error * runTime.seconds());
+        double derivative = (error-FFVar.lastError)/runTime.seconds();
+
+        double power = FFVar.kP*error+FFVar.kI*FFVar.integralSum+FFVar.kD*derivative;
+        power = Math .max(-1, Math.min(1, power));
+        vertSlideL.setTargetPosition((int)power);
+        vertSlideR.setTargetPosition((int)power);
+        runTime.reset();
+        FFVar.lastError= (float) error;
     }
     public void Telemetry() {
         telemetry.addData("Vertical Right Slide Pos", vertSlideR.getCurrentPosition());
