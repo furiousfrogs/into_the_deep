@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.FFVar;
 
 @TeleOp(name = "FrogDerpsDuoLeon", group= "TeleOp")
-public class FrogDerpsDuoLeon extends OpMode {
+public class FrogDerpsSolo extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
@@ -200,7 +200,7 @@ public class FrogDerpsDuoLeon extends OpMode {
         if (vertSlideL.getCurrentPosition() > 2000) {
             frontLeftPower = frontLeftPower/2;
             frontRightPower = frontRightPower/2;
-            backLeftPower = backLeftPower/2; 
+            backLeftPower = backLeftPower/2;
             backRightPower = backRightPower/2;
         }
         // Set motor powers
@@ -224,13 +224,13 @@ public class FrogDerpsDuoLeon extends OpMode {
         // Update current state with the latest gamepad data
         currentGamepad2.copy(gamepad2);
 
-        if (gamepad2.options && !intaking && !outtaking) {
+        if (gamepad1.options && !intaking && !outtaking) {
             outArm.setPosition(FFVar.ArmOut);
             wrist.setPosition(FFVar.WristOut);
             claw.setPosition(FFVar.ClawOpen);
         }
 
-        if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) { //Intake
+        if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) { //Intake
             if (intake.getPower() < 0.2) {
                 intake.setPower(0.8);
                 intaking = false;
@@ -241,7 +241,7 @@ public class FrogDerpsDuoLeon extends OpMode {
         }
 
 
-        if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) {
+        if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
             if (intake.getPower() > -0.2) {
                 intake.setPower(-0.8); // Reverse
                 intaking = true;
@@ -267,7 +267,7 @@ public class FrogDerpsDuoLeon extends OpMode {
         }
 
 
-        if (currentGamepad2.cross && !previousGamepad2.cross && !transfering) { // Arm down
+        if (currentGamepad1.cross && !previousGamepad1.cross && !transfering) { // Arm down
             if (leftIn.getPosition() > 0.5) {
                 // Set servo positions to ArmDwn
                 leftIn.setPosition(FFVar.InWait);
@@ -299,7 +299,7 @@ public class FrogDerpsDuoLeon extends OpMode {
             rightIn.setPosition(FFVar.InWait);
         }
 
-        if (currentGamepad2.circle && !previousGamepad2.circle && sample) {
+        if (currentGamepad1.circle && !previousGamepad1.circle && sample) {
             outtaking = true;
             // Start the Outtake action
             outArm.setPosition(FFVar.ArmOut2);
@@ -332,7 +332,7 @@ public class FrogDerpsDuoLeon extends OpMode {
             }
         }
 
-        if ((currentGamepad2.triangle && !previousGamepad2.triangle) || (currentGamepad1.triangle && !previousGamepad1.triangle)) {
+        if (currentGamepad1.triangle && !previousGamepad1.triangle) {
             if (!hortouch.isPressed()) {
                 horSlide.setPower(-1);
             }
@@ -344,7 +344,7 @@ public class FrogDerpsDuoLeon extends OpMode {
             resetver = true;
         }
 
-        if (((currentGamepad2.square && !previousGamepad2.square) || (currentGamepad1.square && !previousGamepad1.square))  && !transfering && !outtaking) {
+        if ((currentGamepad1.square && !previousGamepad1.square) && !transfering && !outtaking) {
             transfering = true;
             if (horSlide.getCurrentPosition() >= 350) {
                 leftIn.setPosition(FFVar.InWait);
@@ -448,14 +448,14 @@ public class FrogDerpsDuoLeon extends OpMode {
                 limitCalculated = true; // Lock the limit while the slide is moving
             }
             if (horSlide.getCurrentPosition() > dynamicLimit) {
-                if (-gamepad2.left_stick_x < 0) {
-                    horSlide.setPower(-gamepad2.left_stick_x);
+                if (gamepad1.right_stick_x < 0) {
+                    horSlide.setPower(gamepad1.right_stick_x);
                 } else {
                     horSlide.setPower(0);
                 }
             } else {
-                horSlide.setPower(-gamepad2.left_stick_x); // Horizontal slide
-                if (-gamepad2.left_stick_x != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
+                horSlide.setPower(gamepad1.right_stick_x); // Horizontal slide
+                if (gamepad1.right_stick_x != 0 && !hortouch.isPressed() && leftIn.getPosition() < 0.3) {
                     leftIn.setPosition(FFVar.InWait);
                     rightIn.setPosition(FFVar.InWait);
                 } else if (hortouch.isPressed()) {
@@ -465,23 +465,23 @@ public class FrogDerpsDuoLeon extends OpMode {
             }
 
         }
-        if (Math.abs(-gamepad2.left_stick_x) < 0.1) {
+        if (Math.abs(gamepad1.right_stick_x) < 0.1) {
             limitCalculated = false; // Allow recalculation of the limit
         }
 // Handle vertical slide reset logic
 
         if (!resetver && !transfering) {
             if (vertSlideR.getCurrentPosition() > 4000) {
-                if (gamepad2.left_stick_y > 0) {
-                    vertSlideL.setPower(-gamepad2.left_stick_y); // Vertical slide
-                    vertSlideR.setPower(-gamepad2.left_stick_y);
+                if (gamepad1.right_stick_y > 0) {
+                    vertSlideL.setPower(-gamepad1.right_stick_y); // Vertical slide
+                    vertSlideR.setPower(-gamepad1.right_stick_y);
                 } else {
                     vertSlideL.setPower(0); // Vertical slide
                     vertSlideR.setPower(0);
                 }
             } else {
-                vertSlideL.setPower(-gamepad2.left_stick_y); // Vertical slide
-                vertSlideR.setPower(-gamepad2.left_stick_y);
+                vertSlideL.setPower(-gamepad1.right_stick_y); // Vertical slide
+                vertSlideR.setPower(-gamepad1.right_stick_y);
             }
 
         }

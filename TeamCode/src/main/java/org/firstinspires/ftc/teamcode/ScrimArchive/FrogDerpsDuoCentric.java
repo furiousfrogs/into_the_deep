@@ -1,5 +1,4 @@
-package org.firstinspires.ftc.teamcode;
-import android.drm.DrmStore;
+package org.firstinspires.ftc.teamcode.ScrimArchive;
 
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -8,8 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;//importing libraries
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -18,7 +15,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.internal.webserver.websockets.InternalWebSocketCommandException;
+import org.firstinspires.ftc.teamcode.FFVar;
+
 @Disabled
 @TeleOp(name = "FrogDerpsDuoCentric", group= "TeleOp")
 public class FrogDerpsDuoCentric extends OpMode {
