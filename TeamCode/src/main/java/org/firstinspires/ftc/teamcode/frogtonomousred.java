@@ -113,6 +113,8 @@ public class frogtonomousred extends LinearOpMode{
                 if (!initialized) {
                     spin.setPower(1);
                     timer.reset();
+                    leftintake.setPosition(0.5);
+                    rightintake.setPosition(0.5);
                     initialized = true;
                 }
 
@@ -126,6 +128,8 @@ public class frogtonomousred extends LinearOpMode{
                     // false stops action rerun
                     spin.setPower(-1);
                     timer.reset();
+                    leftintake.setPosition(FFVar.InDown);
+                    rightintake.setPosition(FFVar.InDown);
                     return false;
                 }
                 // overall, the action powers the lift until it surpasses
@@ -375,8 +379,8 @@ public class frogtonomousred extends LinearOpMode{
         TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-2, 36, Math.toRadians(90)))
                 .lineToY(30);
         TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 32, Math.toRadians(90)))
-                .splineTo(new Vector2d(-34, 40), Math.toRadians(223));
-        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-34, 40, Math.toRadians(223)))
+                .splineTo(new Vector2d(-34, 40), Math.toRadians(227));
+        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-34, 40, Math.toRadians(227)))
                 .turnTo(Math.toRadians(120));
         TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(135)))
                 .splineTo(new Vector2d(-39, 40), Math.toRadians(216));
@@ -399,7 +403,7 @@ public class frogtonomousred extends LinearOpMode{
                 .lineToYConstantHeading(50)
                 .strafeToSplineHeading(new Vector2d(4, 36), Math.toRadians(90));
         TrajectoryActionBuilder blueside12 = myBot.actionBuilder(new Pose2d(4, 36, Math.toRadians(90)))
-                .lineToYConstantHeading(31);
+                .lineToYConstantHeading(29);
         TrajectoryActionBuilder blueside13 = myBot.actionBuilder(new Pose2d(4, 28, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
