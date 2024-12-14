@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.FFVar;
 
-@TeleOp(name = "FrogDerpsDuoLeon", group= "TeleOp")
+@TeleOp(name = "FrogDerpsSolo", group= "TeleOp")
 public class FrogDerpsSolo extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
