@@ -502,10 +502,9 @@ public class FrogDerpsDuoLeon extends OpMode {
         telemetry.addData("Vertical left Slide Pos", vertSlideL.getCurrentPosition());
         telemetry.addData("Horizontal Slide Pos", horSlide.getCurrentPosition());
         telemetry.addData("hor power", horSlide.getPower());
-        telemetry.addData("red", coloursensor.red());
-        telemetry.addData("green", coloursensor.green());
-        telemetry.addData("blue", coloursensor.blue());
-        telemetry.addData("gamepad x", gamepad1.right_stick_x);
+        telemetry.addData("ver left power", vertSlideL.getPower());
+        telemetry.addData("ver right power", vertSlideR.getPower());
+
         if (intaking) {
             telemetry.addLine("intaking");
         }
@@ -521,15 +520,7 @@ public class FrogDerpsDuoLeon extends OpMode {
             telemetry.addLine("Intake down");
         }
 
-        YawPitchRollAngles robotOrientation;
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-        double Yaw= robotOrientation.getYaw(AngleUnit.DEGREES);
-        double Pitch = robotOrientation.getPitch(AngleUnit.DEGREES);
-        double Roll = robotOrientation.getRoll (AngleUnit.DEGREES);
-        telemetry.addLine("   ");
-        telemetry.addData("Pitch:",Yaw);
-        telemetry.addData("Pitch",Pitch);
-        telemetry.addData("Roll",Roll);
+
     }
     @Override
     public void loop () {
