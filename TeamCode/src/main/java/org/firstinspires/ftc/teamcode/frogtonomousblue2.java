@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 // RR-specific imports
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 
@@ -15,6 +17,8 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -22,10 +26,12 @@ import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
+import java.util.Arrays;
+
 
 @Config
-@Autonomous(name = "frogtonomousblue2(fast)", group = "Autonomous")
-public class frogtonomousblue extends LinearOpMode{
+@Autonomous(name = "frogtonomousfast", group = "Autonomous")
+public class frogtonomousblue2 extends LinearOpMode{
 
     public class push {
         private TouchSensor hortouch;
@@ -226,7 +232,7 @@ public class frogtonomousblue extends LinearOpMode{
                 double pos2 = verticalslideR.getCurrentPosition();
                 double pos = (pos1+pos2)/2;
                 packet.put("liftPos", pos);
-                if (pos < 2060.0) {
+                if (pos < 1950.0) {
                     // true causes the action to rerun
                     return true;
                 } else {
@@ -365,12 +371,12 @@ public class frogtonomousblue extends LinearOpMode{
         TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-4, 36, Math.toRadians(90)))
                 .lineToY(32);
         TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 32, Math.toRadians(90)))
-                .splineTo(new Vector2d(-30, 40), Math.toRadians(212));
-        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(212)))
+                .splineTo(new Vector2d(-30, 40), Math.toRadians(214));
+        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(214)))
                 .turnTo(Math.toRadians(120));
         TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(135)))
-                .splineTo(new Vector2d(-37, 40), Math.toRadians(208));
-        TrajectoryActionBuilder blueside6 = myBot.actionBuilder(new Pose2d(-37, 40, Math.toRadians(208)))
+                .splineTo(new Vector2d(-38, 40), Math.toRadians(210));
+        TrajectoryActionBuilder blueside6 = myBot.actionBuilder(new Pose2d(-38, 40, Math.toRadians(210)))
                 .turnTo(Math.toRadians(120));
         TrajectoryActionBuilder blueside7 = myBot.actionBuilder(new Pose2d(-44, 40,Math.toRadians(135)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
@@ -378,27 +384,27 @@ public class frogtonomousblue extends LinearOpMode{
                 .lineToYConstantHeading(67);
         TrajectoryActionBuilder blueside8 = myBot.actionBuilder(new Pose2d(-40, 67, Math.toRadians(270)))
                 .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(-3, 36), Math.toRadians(90) );
-        TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(-3, 36, Math.toRadians(90)))
+                .strafeToSplineHeading(new Vector2d(-1, 36), Math.toRadians(90) );
+        TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(-1, 36, Math.toRadians(90)))
                 .lineToYConstantHeading(28);
-        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-3, 28, Math.toRadians(90)))
+        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-1, 28, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
                 .lineToYConstantHeading(66);
         TrajectoryActionBuilder blueside11 = myBot.actionBuilder(new Pose2d(-40, 66, Math.toRadians(270)))
                 .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(1, 36), Math.toRadians(90));
-        TrajectoryActionBuilder blueside12 = myBot.actionBuilder(new Pose2d(-1, 36, Math.toRadians(90)))
+                .strafeToSplineHeading(new Vector2d(2, 36), Math.toRadians(90));
+        TrajectoryActionBuilder blueside12 = myBot.actionBuilder(new Pose2d(2, 36, Math.toRadians(90)))
                 .lineToYConstantHeading(28);
-        TrajectoryActionBuilder blueside13 = myBot.actionBuilder(new Pose2d(-1, 28, Math.toRadians(90)))
+        TrajectoryActionBuilder blueside13 = myBot.actionBuilder(new Pose2d(2, 28, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
                 .lineToYConstantHeading(65);
-        TrajectoryActionBuilder blueside14 = myBot.actionBuilder(new Pose2d(-40, 65, Math.toRadians(270)))
-                .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(3, 36), Math.toRadians(90));
-        TrajectoryActionBuilder blueside15 = myBot.actionBuilder(new Pose2d(3, 36, Math.toRadians(90)))
-                .lineToYConstantHeading(33);
+//        TrajectoryActionBuilder blueside14 = myBot.actionBuilder(new Pose2d(-40, 65, Math.toRadians(270)))
+//                .lineToYConstantHeading(50)
+//                .strafeToSplineHeading(new Vector2d(3, 36), Math.toRadians(90));
+//        TrajectoryActionBuilder blueside15 = myBot.actionBuilder(new Pose2d(3, 36, Math.toRadians(90)))
+//                .lineToYConstantHeading(33);
 
 
         while (!isStopRequested() && !opModeIsActive()) {
@@ -440,8 +446,8 @@ public class frogtonomousblue extends LinearOpMode{
         traj11 = blueside11.build();
         traj12 = blueside12.build();
         traj13 = blueside13.build();
-        traj14 = blueside14.build();
-        traj15 = blueside15.build();
+//        traj14 = blueside14.build();
+//        traj15 = blueside15.build();
 
         //new SleepAction(1),
 
