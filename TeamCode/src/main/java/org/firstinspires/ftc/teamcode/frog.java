@@ -30,8 +30,8 @@ import java.util.Arrays;
 
 
 @Config
-@Autonomous(name = "frogtonomousfast", group = "Autonomous")
-public class frogtonomousblue2 extends LinearOpMode{
+@Autonomous(name = "frogtonomous", group = "Autonomous")
+public class frog extends LinearOpMode{
 
     public class push {
         private TouchSensor hortouch;
