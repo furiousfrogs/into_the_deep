@@ -379,10 +379,10 @@ public class frogtonomousred extends LinearOpMode{
         TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-2, 36, Math.toRadians(90)))
                 .lineToY(30);
         TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 32, Math.toRadians(90)))
-                .splineTo(new Vector2d(-34, 40), Math.toRadians(227));
-        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-34, 40, Math.toRadians(227)))
+                .splineTo(new Vector2d(-28, 40), Math.toRadians(221));
+        TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-28, 40, Math.toRadians(221)))
                 .turnTo(Math.toRadians(120));
-        TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(135)))
+        TrajectoryActionBuilder blueside5 = myBot.actionBuilder(new Pose2d(-28, 40, Math.toRadians(135)))
                 .splineTo(new Vector2d(-39, 40), Math.toRadians(216));
         TrajectoryActionBuilder blueside6 = myBot.actionBuilder(new Pose2d(-39, 40, Math.toRadians(216)))
                 .turnTo(Math.toRadians(120));
@@ -392,10 +392,10 @@ public class frogtonomousred extends LinearOpMode{
                 .lineToYConstantHeading(67);
         TrajectoryActionBuilder blueside8 = myBot.actionBuilder(new Pose2d(-40, 67, Math.toRadians(270)))
                 .lineToYConstantHeading(50)
-                .strafeToSplineHeading(new Vector2d(-4, 36), Math.toRadians(90) );
-        TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(-4, 36, Math.toRadians(90)))
-                .lineToYConstantHeading(28);
-        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-4, 28, Math.toRadians(90)))
+                .strafeToSplineHeading(new Vector2d(0, 36), Math.toRadians(90) );
+        TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(0, 36, Math.toRadians(90)))
+                .lineToYConstantHeading(27);
+        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(0, 28, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
                 .lineToYConstantHeading(69);
@@ -403,7 +403,7 @@ public class frogtonomousred extends LinearOpMode{
                 .lineToYConstantHeading(50)
                 .strafeToSplineHeading(new Vector2d(4, 36), Math.toRadians(90));
         TrajectoryActionBuilder blueside12 = myBot.actionBuilder(new Pose2d(4, 36, Math.toRadians(90)))
-                .lineToYConstantHeading(29);
+                .lineToYConstantHeading(24);
         TrajectoryActionBuilder blueside13 = myBot.actionBuilder(new Pose2d(4, 28, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)

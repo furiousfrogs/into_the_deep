@@ -360,16 +360,17 @@ public class frog extends LinearOpMode{
         push PUSHFROGGY = new push(hardwareMap);
         lift LIFTFROGGY = new lift(hardwareMap);
 
-        MecanumDrive myBot = new MecanumDrive(hardwareMap, new Pose2d(-8, 62, Math.toRadians(90)));
+        MecanumDrive myBot = new MecanumDrive(hardwareMap, new Pose2d(0, 62, Math.toRadians(90)));
 
 
 
 
-
-        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(new Pose2d(-8, 62, Math.toRadians(90)))
-                .strafeToConstantHeading(new Vector2d(-4, 36));
-        TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-4, 36, Math.toRadians(90)))
+        TrajectoryActionBuilder blueside1 = myBot.actionBuilder(new Pose2d(0, 62, Math.toRadians(90)))
+                .strafeToConstantHeading(new Vector2d(-6, 36));
+        TrajectoryActionBuilder blueside2 = myBot.actionBuilder(new Pose2d(-6, 36, Math.toRadians(90)))
                 .lineToY(32);
+        TrajectoryActionBuilder blueside21 = myBot.actionBuilder(new Pose2d(-4, 32, Math.toRadians(90)))
+                .strafeTo(new Vector2d(20, 50));
         TrajectoryActionBuilder blueside3 = myBot.actionBuilder(new Pose2d(-8, 32, Math.toRadians(90)))
                 .splineTo(new Vector2d(-30, 40), Math.toRadians(214));
         TrajectoryActionBuilder blueside4 = myBot.actionBuilder(new Pose2d(-30, 40, Math.toRadians(214)))
@@ -386,8 +387,8 @@ public class frog extends LinearOpMode{
                 .lineToYConstantHeading(50)
                 .strafeToSplineHeading(new Vector2d(-1, 36), Math.toRadians(90) );
         TrajectoryActionBuilder blueside9 = myBot.actionBuilder(new Pose2d(-1, 36, Math.toRadians(90)))
-                .lineToYConstantHeading(28);
-        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-1, 28, Math.toRadians(90)))
+                .lineToYConstantHeading(27);
+        TrajectoryActionBuilder blueside10 = myBot.actionBuilder(new Pose2d(-1, 27, Math.toRadians(90)))
                 .strafeToSplineHeading(new Vector2d(-40, 50), Math.toRadians(270))
                 .waitSeconds(0.1)
                 .lineToYConstantHeading(66);
@@ -435,7 +436,7 @@ public class frog extends LinearOpMode{
 
         traj1 = blueside1.build();
         traj2 = blueside2.build();
-        traj3 = blueside3.build();
+        traj3 = blueside21.build();
         traj4 = blueside4.build();
         traj5 = blueside5.build();
         traj6 = blueside6.build();
@@ -453,6 +454,7 @@ public class frog extends LinearOpMode{
 
         Actions.runBlocking(
                 new SequentialAction(
+                        new SleepAction(4),
                         new ParallelAction(
                                 traj1,
                                 new SequentialAction(
@@ -461,43 +463,44 @@ public class frog extends LinearOpMode{
                         ),
                         traj2,
                         LIFTFROGGY.liftback(),
-
-                        PUSHFROGGY.pushsetup(),
-                        //2spec? here
-                        traj3,
-                        PUSHFROGGY.pushtake(),
-                        traj4,
-                        PUSHFROGGY.pushout(),
-                        traj5,
-                        traj6,
-                        PUSHFROGGY.pushout(),
-                        PUSHFROGGY.pushreturn(),
-                        traj7,
-                        LIFTFROGGY.liftfromwall(),
-                        new ParallelAction(
-                                traj8,
-                                new SequentialAction(
-                                        LIFTFROGGY.liftup()
-                                )
-                        ),
-                        traj9,
-                        LIFTFROGGY.liftback(),
-                        traj10,
-                        LIFTFROGGY.liftfromwall() ,
-                        new ParallelAction(
-                                traj11,
-                                new SequentialAction(
-                                        LIFTFROGGY.liftup()
-                                )
-                        ),
-                        traj12,
-                        LIFTFROGGY.liftback(),
-                        traj13
+                        traj3
+//
+//                        PUSHFROGGY.pushsetup(),
+//                        //2spec? here
+//                        traj3,
+//                        PUSHFROGGY.pushtake(),
+//                        traj4,
+//                        PUSHFROGGY.pushout(),
+//                        traj5,
+//                        traj6,
+//                        PUSHFROGGY.pushout(),
+//                        PUSHFROGGY.pushreturn(),
+//                        traj7,
 //                        LIFTFROGGY.liftfromwall(),
-//                        traj14,
-//                        LIFTFROGGY.liftup(),
-//                        traj15,
-//                        LIFTFROGGY.liftback()
+//                        new ParallelAction(
+//                                traj8,
+//                                new SequentialAction(
+//                                        LIFTFROGGY.liftup()
+//                                )
+//                        ),
+//                        traj9,
+//                        LIFTFROGGY.liftback(),
+//                        traj10,
+//                        LIFTFROGGY.liftfromwall() ,
+//                        new ParallelAction(
+//                                traj11,
+//                                new SequentialAction(
+//                                        LIFTFROGGY.liftup()
+//                                )
+//                        ),
+//                        traj12,
+//                        LIFTFROGGY.liftback(),
+//                        traj13
+////                        LIFTFROGGY.liftfromwall(),
+////                        traj14,
+////                        LIFTFROGGY.liftup(),
+////                        traj15,
+////                        LIFTFROGGY.liftback()
 
                 )
         );
