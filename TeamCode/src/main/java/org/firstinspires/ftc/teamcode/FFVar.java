@@ -34,12 +34,13 @@ public class FFVar {
     public static float WristTransfer2 = 0.1F;
 
     // PID coefficients
-    public static float kP = 0.01F; // Proportional gain
-    public static float kI = 0.0F;  // Integral gain
-    public static float kD = 0.0F;  // Derivative gain
+    public static double kP = 0.01; // Proportional gain
+    public static double kI = 0.0;  // Integral gain
+    public static double kD = 0.0;  // Derivative gain
+    public static double kF = 0.0; //Feedforward gain
 
     //pid state variables
-    public static float targetPosition = 0F; // Desired slide position
-    public static float lastError = 0F; // Previous error for derivative calculation
-    public static float integralSum = 0F; // Accumulated integral
+    public static double targetPosition = 300.0; // Desired slide position
+    public static double lastError = 0; // Previous error for derivative calculation
+    public static double integralSum = 0; // Accumulated integral
 }
