@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;//importing libraries
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -22,6 +23,12 @@ public class FrogDeprsPID extends OpMode {
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
 
+    double previousPower = 0;
+
+    private boolean pidActive = false; // Tracks if PID is actively controlling
+    private double targetPosition = 0.0; // Desired target position
+    private double error, proportional, integral, derivative, power;
+    private final double tolerance = 5.0; // Adjust based on your system (e.g., ±5 ticks)
 
     boolean sample = false;
     private ElapsedTime timer;
@@ -62,12 +69,10 @@ public class FrogDeprsPID extends OpMode {
     Gamepad previousGamepad2;
 
 
-
-
     @Override
     public void init() {
 
-        imu=hardwareMap.get(BHI260IMU.class,"imu");
+        imu = hardwareMap.get(BHI260IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.UP,
@@ -150,7 +155,6 @@ public class FrogDeprsPID extends OpMode {
         timer.reset();
 
 
-
         while (timer.seconds() < 0.3) {
             // Wait for 1 second
         }
@@ -168,7 +172,7 @@ public class FrogDeprsPID extends OpMode {
         boolean slow = gamepad1.options;
         double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-        double rx =  (gamepad1.right_trigger - gamepad1.left_trigger) / turnvar;
+        double rx = (gamepad1.right_trigger - gamepad1.left_trigger) / turnvar;
 
 
         double slowvar = 2.0; // Slow mode divisor
@@ -198,10 +202,10 @@ public class FrogDeprsPID extends OpMode {
             backRightPower /= maxPower;
         }
         if (vertSlideL.getCurrentPosition() > 2000) {
-            frontLeftPower = frontLeftPower/2;
-            frontRightPower = frontRightPower/2;
-            backLeftPower = backLeftPower/2;
-            backRightPower = backRightPower/2;
+            frontLeftPower = frontLeftPower / 2;
+            frontRightPower = frontRightPower / 2;
+            backLeftPower = backLeftPower / 2;
+            backRightPower = backRightPower / 2;
         }
         // Set motor powers
         frontLeft.setPower(frontLeftPower);
@@ -209,6 +213,7 @@ public class FrogDeprsPID extends OpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
     }
+
     public void manualTake() {
         //manual controls
         int red = coloursensor.red();
@@ -344,7 +349,7 @@ public class FrogDeprsPID extends OpMode {
             resetver = true;
         }
 
-        if (((currentGamepad2.square && !previousGamepad2.square) || (currentGamepad1.square && !previousGamepad1.square))  && !transfering && !outtaking) {
+        if (((currentGamepad2.square && !previousGamepad2.square) || (currentGamepad1.square && !previousGamepad1.square)) && !transfering && !outtaking) {
             transfering = true;
             if (horSlide.getCurrentPosition() >= 350) {
                 leftIn.setPosition(FFVar.InWait);
@@ -485,33 +490,55 @@ public class FrogDeprsPID extends OpMode {
             }
 
         }
+    }
 
+    public void handlePID() {
 
-
-        if (gamepad1.dpad_up) {
-            FFVar.targetPosition += 100; // Move up by 100 encoder ticks
-        } else if (gamepad1.dpad_down) {
-            FFVar.targetPosition -= 100; // Move down by 100 encoder ticks
+        if (currentGamepad1.circle && !previousGamepad1.circle) {
+            pidActive = true; // Enable PID
+            FFVar.integralSum = 0; // Reset integral sum
+            FFVar.lastError = 0; // Reset last error
+            targetPosition = FFVar.targetPosition; // Set the target position
         }
 
-        if (gamepad1.circle && !previousGamepad1.circle){
-            double currentPosition=vertSlideL.getCurrentPosition();
-            double error=FFVar.targetPosition-currentPosition;
-            double proportional = FFVar.kP*error;
-            FFVar.integralSum += error;
-            double integral = FFVar.kI*FFVar.integralSum;
-            double derivative = FFVar.kD*(error-FFVar.lastError);
-            double power = proportional + integral+ derivative;
-            power=Math.max(-1,Math.min(1,power));
+        if (pidActive) {
+            double currentPosition = vertSlideL.getCurrentPosition();
+            error = targetPosition - currentPosition; // Calculate error
+
+            // Deadband for small errors to prevent jitter
+            if (Math.abs(error) < tolerance) {
+                pidActive = false; // Disable PID
+                vertSlideL.setPower(0); // Stop motors
+                vertSlideR.setPower(0);
+                return;
+            }
+
+            // Calculate PID terms
+            proportional = FFVar.kP * error;
+            FFVar.integralSum = Math.max(-1000, Math.min(1000, FFVar.integralSum + error)); // Clamp integral sum
+            integral = FFVar.kI * FFVar.integralSum;
+            derivative = FFVar.kD * (error - FFVar.lastError);
+
+            // Calculate total power
+            power = proportional + integral + derivative;
+
+            // Optional: Clamp power to limit maximum motor speed
+            double maxSpeed = 0.8; // Adjust this value as needed (50% power)
+            power = Math.max(-maxSpeed, Math.min(maxSpeed, power));
+
+            // Smooth power to prevent sudden jerks
+            power = (power + previousPower * 0.8) / 1.8; // Weighted smoothing
+            previousPower = power; // Save for the next iteration
+
+            // Apply power to both slide motors
             vertSlideL.setPower(power);
             vertSlideR.setPower(power);
-            FFVar.lastError=error;
 
+            // Update last error for next iteration
+            FFVar.lastError = error;
         }
-
-// Clamp target position to safe limits
-        FFVar.targetPosition = Math.max(0, Math.min(4000, FFVar.targetPosition)); // Adjust range as needed
     }
+
     public void Telemetry() {
         telemetry.addData("Vertical Right Slide Pos", vertSlideR.getCurrentPosition());
         telemetry.addData("Vertical left Slide Pos", vertSlideL.getCurrentPosition());
@@ -535,12 +562,15 @@ public class FrogDeprsPID extends OpMode {
             telemetry.addLine("Intake down");
         }
 
-
+        telemetry.addData("pos", vertSlideR.getCurrentPosition());
+        telemetry.addData("target", FFVar.targetPosition);
+        telemetry.update();
     }
     @Override
     public void loop () {
         drive();
         manualTake();
         Telemetry();
+        handlePID();
     }
 }
