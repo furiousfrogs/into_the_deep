@@ -36,7 +36,7 @@ public class FFVar {
     // PID coefficients
     public static double kP = 0.005; // Proportional gain
     public static double kI = 0.0;  // Integral gain
-    public static double kD = 0.001;  // Derivative gain
+    public static double kD = 0.00;  // Derivative gain
     public static double kF = 0.0; //Feedforward gain
     public static double maxIntegral = 800;
     public static double tolerance = 50;
