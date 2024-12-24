@@ -97,7 +97,6 @@ public class frogtonomousred extends LinearOpMode{
                     return false;
                 }
                 // overall, the action powers the lift until it surpasses
-                // 3000 encoder ticks, then powers it off
             }
         }
         public Action pushsetup() {
