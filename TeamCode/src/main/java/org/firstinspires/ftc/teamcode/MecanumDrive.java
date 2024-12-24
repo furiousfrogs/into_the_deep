@@ -63,7 +63,7 @@ public final class MecanumDrive {
         public RevHubOrientationOnRobot.UsbFacingDirection usbFacingDirection =
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT;
 
-        // drive model parameters
+        // driving model parameters
         public double inPerTick = 0.00053038674;
         public double lateralInPerTick = 0.00032117167335084137;
         public double trackWidthTicks = 23143.913476117683;
@@ -339,7 +339,7 @@ public final class MecanumDrive {
             p.put("yError", error.position.y);
             p.put("headingError (deg)", Math.toDegrees(error.heading.toDouble()));
 
-            // only draw when active; only one drive action should be active at a time
+            // only draw when active; only one driving action should be active at a time
             Canvas c = p.fieldOverlay();
             drawPoseHistory(c);
 
