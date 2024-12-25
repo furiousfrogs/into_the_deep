@@ -19,6 +19,7 @@ public class PIDtes extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
+    // input motors exactly as shown below
 
     double previousPower = 0;
 
@@ -26,6 +27,7 @@ public class PIDtes extends OpMode {
     private double targetPosition = 0.0; // Desired target position
     private double error, proportional, integral, derivative, power;
     private final double tolerance = 5.0; // Adjust based on your system (e.g., ±5 ticks)
+
 
     boolean sample = false;
     private ElapsedTime timer;
@@ -68,6 +70,8 @@ public class PIDtes extends OpMode {
 
     @Override
     public void init() {
+
+
 
         imu = hardwareMap.get(BHI260IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(
@@ -158,6 +162,7 @@ public class PIDtes extends OpMode {
         // Move the intake up
         leftIn.setPosition(FFVar.InUp);
         rightIn.setPosition(FFVar.InUp);
+
 
     }
 
