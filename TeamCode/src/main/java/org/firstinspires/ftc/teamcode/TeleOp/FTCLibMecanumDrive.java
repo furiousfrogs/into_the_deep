@@ -38,7 +38,7 @@ public class FTCLibMecanumDrive extends OpMode {
 
         // Use gamepad inputs for movement
         double y = gamepad1.left_stick_y; // Forward/backward
-        double x = gamepad1.left_stick_x * 1.1; // Strafing (adjust for imperfect strafing)
+        double x = -gamepad1.left_stick_x * 1.1; // Strafing (adjust for imperfect strafing)
         double turn = gamepad1.left_trigger - gamepad1.right_trigger; // Rotation
 
         // Drive the robot
