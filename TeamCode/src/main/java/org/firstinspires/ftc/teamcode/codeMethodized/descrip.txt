@@ -3,5 +3,16 @@ Main
 drive, init, telemetry
 
 
-tasks is an array list of boolean variables in the order:
-[]
+tasks is an array list of double variables in the order:
+[frontLeft, frontRight, backLeft, backRight, leftIn, rightIn, outArm, wrist, claw, horSlide, vertSlideL, vertSlideR, intake]
+step is a variable denoting what step of the transfer the robot is currently on
+0 - intake (defined in inT)
+1 - transfer (defined in transfer)
+2 - outtake (defined in outT)
+
+Loop calls from 5 methods:
+- drive
+- inT
+- transfer
+- outT
+- telemetrics
