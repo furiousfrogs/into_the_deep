@@ -15,41 +15,49 @@ import org.firstinspires.ftc.teamcode.FFVar;
 
 public class Initialization {
 
-    private DcMotor frontLeft, frontRight, backLeft, backRight;
-    private Servo leftIn, rightIn, wrist, outArm, claw;
-    private DcMotor horSlide, vertSlideL, vertSlideR, intake;
+    public Gamepad gamepad1;
+    public Gamepad gamepad2;
+    DcMotor frontLeft;
+    DcMotor frontRight;
+    DcMotor backLeft;
+    DcMotor backRight;
+    public Servo leftIn, rightIn, wrist, outArm, claw;
+    DcMotor horSlide;
+    DcMotor vertSlideL;
+    public DcMotor vertSlideR;
+    public DcMotor intake;
 
 
     boolean sample = false;
-    private ElapsedTime timer;
+    public ElapsedTime timer;
     // Declare globally to maintain state across iterations
-    private ElapsedTime InitTime = new ElapsedTime();
+    public ElapsedTime InitTime = new ElapsedTime();
     boolean InitAct = false;
     boolean Transfer1action = false;
-    private ElapsedTime Transfer1Timer = new ElapsedTime();
+    public ElapsedTime Transfer1Timer = new ElapsedTime();
     boolean Transfer2action = false;
-    private ElapsedTime Transfer2Timer = new ElapsedTime();
-    private ElapsedTime Transfer3Timer = new ElapsedTime();
+    public ElapsedTime Transfer2Timer = new ElapsedTime();
+    public ElapsedTime Transfer3Timer = new ElapsedTime();
     boolean Transfer3action = false;
     boolean OuttakeAction = false;
-    private ElapsedTime OuttakeTimer = new ElapsedTime();
-    private ElapsedTime Transfer4Timer = new ElapsedTime();
+    public ElapsedTime OuttakeTimer = new ElapsedTime();
+    public ElapsedTime Transfer4Timer = new ElapsedTime();
     boolean Transfer4action = false;
 
     boolean OuttakeAction2 = false;
-    private ElapsedTime OuttakeTimer2 = new ElapsedTime();
+    public ElapsedTime OuttakeTimer2 = new ElapsedTime();
 
-    private int dynamicLimit = 1300;
-    private boolean limitCalculated = false;
+    public int dynamicLimit = 1300;
+    public boolean limitCalculated = false;
 
     boolean transfering = false;
     boolean outtaking = false;
 
-    private BHI260IMU imu;
+    public BHI260IMU imu;
 
-    private ColorRangeSensor coloursensor;
-    private TouchSensor hortouch;
-    private TouchSensor vertouch;
+    public ColorRangeSensor coloursensor;
+    public TouchSensor hortouch;
+    public TouchSensor vertouch;
     boolean resethor = false;
     boolean resetver = false;
     boolean intaking = false;
