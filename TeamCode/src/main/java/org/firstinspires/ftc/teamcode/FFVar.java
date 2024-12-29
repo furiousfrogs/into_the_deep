@@ -45,4 +45,7 @@ public class FFVar {
     public static double targetPosition = 1000.0; // Desired slide position
     public static double lastError = 0; // Previous error for derivative calculation
     public static double integralSum = 0; // Accumulated integral
+
+    //LED Values
+    public static double LEDtest = 0.61; //RED
 }
