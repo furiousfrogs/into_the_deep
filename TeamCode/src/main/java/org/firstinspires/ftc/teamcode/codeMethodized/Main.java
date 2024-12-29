@@ -9,16 +9,19 @@ public class Main extends OpMode {
 
     private Initialization initModule;
     private Loop loopModule;
+    private drive driveModule;
 
     @Override
     public void init() {
         initModule = new Initialization();
         loopModule = new Loop();
+        driveModule= new drive();
         initModule.initialize(hardwareMap, gamepad1);
     }
 
     @Override
     public void loop() {
         loopModule.handleLoop(initModule);
+        driveModule.driver(initModule);
     }
 }

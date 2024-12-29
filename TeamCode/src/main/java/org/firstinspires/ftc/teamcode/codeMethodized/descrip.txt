@@ -12,7 +12,9 @@ step is a variable denoting what step of the transfer the robot is currently on
 
 Loop calls from 5 methods:
 - drive
+- miscA
 - inT
 - transfer
 - outT
+- miscB
 - telemetrics

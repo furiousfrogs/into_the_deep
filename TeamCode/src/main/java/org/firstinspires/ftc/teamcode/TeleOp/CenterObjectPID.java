@@ -6,11 +6,11 @@ Right now it should only work for one object so test with one object
  */
 
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.HuskyLens;
-
+import com.qualcomm.robotcore.hardware.DcMotor;
 public class CenterObjectPID extends OpMode {
 
     private HuskyLens huskyLens;
