@@ -33,13 +33,15 @@ public class FFVar {
     public static float WristWait = 0.4F;
     public static float WristTransfer2 = 0.1F;
 
-    // PID coefficients
+    // slide PID coefficients
     public static double kP = 0.005; // Proportional gain
     public static double kI = 0.0;  // Integral gain
     public static double kD = 0.00;  // Derivative gain
     public static double kF = 0.0; //Feedforward gain
     public static double maxIntegral = 800;
     public static double tolerance = 50;
+
+
 
     //pid state variables
     public static double targetPosition = 1000.0; // Desired slide position
