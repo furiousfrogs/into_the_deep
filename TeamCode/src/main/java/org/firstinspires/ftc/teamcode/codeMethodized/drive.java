@@ -14,7 +14,6 @@ public class drive {
         double slowvar = 2.0; // Slow mode divisor
         double speedFactor = slow ? 1 / slowvar : 1;
 
-
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
 
 
