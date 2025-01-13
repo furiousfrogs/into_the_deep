@@ -16,8 +16,11 @@ import org.firstinspires.ftc.teamcode.codeMethodized.VarAll;
 public class Initialization {
 
     //variables
+    double[] currentGod = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+    double[] previousGod = currentGod;
 
     public void initialize(HardwareMap hardwareMap, Gamepad gamepad1) {
         //initalized stuff
+        currentGod[1]=0;
     }
 }

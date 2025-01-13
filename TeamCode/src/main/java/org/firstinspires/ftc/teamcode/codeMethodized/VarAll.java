@@ -51,4 +51,6 @@ public class VarAll {
     public Gamepad previousGamepad1;
     public Gamepad currentGamepad2;
     public Gamepad previousGamepad2;
+
+
 }
