@@ -1,20 +1,11 @@
 package org.firstinspires.ftc.teamcode.codeMethodized;
 
-import com.qualcomm.hardware.bosch.BHI260IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
 
 public class Initialization {
     public DcMotor frontLeft,frontRight,backLeft,backRight;
@@ -24,8 +15,12 @@ public class Initialization {
     public TouchSensor hortouch;
     public TouchSensor vertouch;
     //variables
-    double[] currentGod = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //NEEDS TO BE CHANGED!!!!!!!!!!!!!!!!!!!!!!!!!
+    double[] currentGod = VarAll.initPos; //NEEDS TO BE CHANGED!!!!!!!!!!!!!!!!!!!!!!!!!
     double[] previousGod = currentGod;
+    Gamepad currentGamepad1;
+    Gamepad previousGamepad1;
+    Gamepad currentGamepad2;
+    Gamepad previousgamepad2;
 
     public void initialize(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         //initalized stuff
@@ -96,8 +91,11 @@ public class Initialization {
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        gamepad1=new Gamepad();
-        gamepad2=new Gamepad();
+        currentGamepad1 =gamepad1;
+        previousGamepad1 =new Gamepad();
+        currentGamepad2 =gamepad2;
+        previousgamepad2 = new Gamepad();
+
 
         hortouch=hardwareMap.get(TouchSensor.class,"horTouch");
         vertouch=hardwareMap.get(TouchSensor.class,"verTouch");
