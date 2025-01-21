@@ -12,7 +12,7 @@ public class Main extends OpMode {
     public void init() {
         initModule = new Initialization();
         loopModule = new Loop();
-        initModule.initialize(hardwareMap, gamepad1);
+        initModule.initialize(hardwareMap, gamepad1, gamepad2);
     }
 
     @Override

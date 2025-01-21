@@ -10,11 +10,7 @@ step is a variable denoting what step of the transfer the robot is currently on
 1 - transfer (defined in transfer)
 2 - outtake (defined in outT)
 
-Loop calls from 5 methods:
-- drive
-- miscA
-- inT
-- transfer
-- outT
-- miscB
-- telemetrics
+Main calls init and initialization and loop
+loop calls calculate and communicate
+calculate is meant to determine how the robot should act based on input
+communicate tells the robot how to act.
