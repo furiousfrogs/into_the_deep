@@ -94,9 +94,9 @@ public class Initialization {
         gate.setdirection(Servo.direction.FORWARD);
 
         currentGamepad1 =gamepad1;
-        previousGamepad1 =new Gamepad();
+        previousGamepad1.copy(currentGamepad1);
         currentGamepad2 =gamepad2;
-        previousgamepad2 = new Gamepad();
+        previousgamepad2.copy(currentGamepad2);
 
 
         hortouch=hardwareMap.get(TouchSensor.class,"horTouch");
