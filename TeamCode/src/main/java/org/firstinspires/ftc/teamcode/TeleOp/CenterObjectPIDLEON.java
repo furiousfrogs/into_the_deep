@@ -21,7 +21,6 @@ public class CenterObjectPIDLEON extends OpMode {
 
     private static final int READ_PERIOD = 2; // Rate limit in seconds
     private Deadline rateLimit;
-
     private HuskyLens huskyLens;
 
     // Tune these values
