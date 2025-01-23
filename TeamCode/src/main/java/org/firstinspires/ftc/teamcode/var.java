@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 @Config
-public class FFVar {
+public class var {
     //Time
     public static float TransferATime = 0.7F;
     public static float TransferBTime = 0.5F;
@@ -17,21 +17,19 @@ public class FFVar {
     public static float InWait2 = 0.3F; // this is for square when slide is retracted
 
     //Bigger number - arm is lower
-    public static float ArmOut2 = 0.09F;
-    public static float ArmOut = 0.17F;
-    public static float ArmTransfer = 0.39F;
-    public static float ArmInit = 0.3F;
-    public static float ArmWait = 0.3F;
+    public static float armOut = 0.85F;
+    public static float armTransfer = 0.4F;
+    public static float armSpec = 0.02F;
+
 
     //Bigger number - claw is open
     public static float ClawClose = 0.63F;
     public static float ClawOpen = 0.45F;
 
     //Bigger number - wrist goes out
-    public static float WristTransfer = 0.12F;
-    public static float WristOut = 0.7F;
-    public static float WristWait = 0.4F;
-    public static float WristTransfer2 = 0.1F;
+    public static float wristTransfer = 0.23F;
+    public static float wristOut = 1F;
+    public static float wristSpec = 0.3F;
 
     // slide PID coefficients
     public static double kP = 0.005; // Proportional gain
