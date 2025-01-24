@@ -201,30 +201,30 @@ boolean pidActive = false;
 //circle is the outtake button
             // if sample boolean is true, one press will bring the arm up and another press will lower it
 
-            if (currentGamepad1.circle && !previousGamepad1.circle && sample && !slidesUp) {
+            if (currentGamepad1.circle && !previousGamepad1.circle && sample && !slidesUp) {   //this will raise the slides to the deposit position. the timer is caused so there is a 0.2 second delay between when you grab the sample and when u move the slides.
                 claw.setPosition(var.clawClose);
                 transferAction = true;
                 transferTimer.reset();
-            } else if (currentGamepad1.circle && !previousGamepad1.circle && !slidesDown && !slidesSpecDown) {
+            } else if (currentGamepad1.circle && !previousGamepad1.circle && !slidesDown && !slidesSpecDown) { //this is used to lower the slides to the transfer position. it only works if the slide is at the deopis position. THIS SHOULD BE THE DEFAULT POSITION THE CLAW CAN RETURN TO
                 claw.setPosition(var.clawOpen);
                 outtakeAction = true;
                 outtakeTimer.reset();
                 transferTime = 0.2;
-            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecDown) {
+            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecDown) { //this is to return the arm to the deposit position when the arm is in the pickup sample position. it needs to be different because there has to be a delay between closing the claw and moving the arm.  THIS IS VERY IMPORTANT OR ELSE THE CLAW WILL BREAK
                 outArm.setPosition(var.armTransfer);
                 wrist.setPosition(var.wristTransfer);
                 claw.setPosition(var.clawClose);
                 outtakeAction = true;
                 outtakeTimer.reset();
                 transferTime = 0.4;
-            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecUp) {
+            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecUp) { //this is for lowering the arm to the transfer position. it is the same as the default position i just dk how to do it
                 outtakeAction = true;
                 outtakeTimer.reset();
                 spec = false;
                 specReady = false;
             }
 
-            if (transferAction && transferTimer.seconds() > 0.2) {
+            if (transferAction && transferTimer.seconds() > 0.2) { //this timer is for the depositing. 0.2 seconds after the button for deposit is pressed, this will move. THIS IS IMPORTANT TO ENSURE THE CLAW PICKS UP A SAMPLE BEFORE MOVING
                 vertSlideL.setPower(1);
                 vertSlideR.setPower(1);
                 vertSlideL.setTargetPosition(1800);
@@ -236,7 +236,7 @@ boolean pidActive = false;
                 transferAction = false;
             }
 
-            if (outtakeAction && outtakeTimer.seconds() > transferTime) {
+            if (outtakeAction && outtakeTimer.seconds() > transferTime) { //this is for trabnsfering. the 0.2 second is necessary to ensure that the claw has time to drop the samples before moving. when this button is pressed when the claw is picking up a specimen THE 0.4 SECOND WAIT IS REQUIRED OR ELSE THE CLAW WILL BREAK
                 outArm.setPosition(var.armTransfer);
                 wrist.setPosition(var.wristTransfer);
                 vertSlideL.setPower(1);
@@ -254,8 +254,8 @@ boolean pidActive = false;
 
 
             //triangle is the specimen scoring position
-            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                if (!slidesSpecDown && !spec && !specReady) {
+            if (currentGamepad1.triangle && !previousGamepad1.triangle) { //all triangles are here
+                if (!slidesSpecDown && !spec && !specReady) { //this brings the arm to the spec pickup
                     claw.setPosition(var.clawClose);
                     vertSlideL.setPower(1);
                     vertSlideR.setPower(1);
@@ -267,7 +267,7 @@ boolean pidActive = false;
                     specAction = true;
 
 
-                } else if (slidesSpecDown && !slidesSpecUp && !spec && !specReady) {
+                } else if (slidesSpecDown && !slidesSpecUp && !spec && !specReady) { //this brings the arm to the spec score
 
                     claw.setPosition(var.clawClose);
                     specTimer2.reset();
@@ -275,20 +275,20 @@ boolean pidActive = false;
                     spec = true;
                     abort = false;
 
-                } else if (slidesSpecUp && specReady) {
+                } else if (slidesSpecUp && specReady) { //this releases the spec to score it
                     claw.setPosition(var.clawOpen);
                     specReady = false;
                     spec = false;
                 }
             }
 
-            if (specAction && specTimer.seconds() > 0.5) {
+            if (specAction && specTimer.seconds() > 0.5) { //this is for when the arm moves from default to spec pickup. THIS 0.5 SECOND WAIT BEFORE REOPENING THE CLAW IS REQUIRED OR ELSE THE CLAW WILL BREAK
                 claw.setPosition(var.clawOpenWide);
                 slidesSpecDown = true;
                 slidesSpecUp = false;
                 specAction = false;
             }
-            if (specAction2 && specTimer2.seconds() > 1 && !abort) {
+            if (specAction2 && specTimer2.seconds() > 1 && !abort) { //this is the code to bring the arm to the scoring position. THE 1 SECOND WAIT IS REQUIRED BEFORE MOVING THE ARM OR ELSE THE CLAW WILL BREAK
                 outArm.setPosition(var.armSpecScore);
                 wrist.setPosition(var.wristSpecScore);
                 vertSlideL.setPower(1);
@@ -299,7 +299,7 @@ boolean pidActive = false;
                 slidesSpecDown = false;
                 specReady = true;
                 specAction2 = false;
-            } else if (currentGamepad1.triangle && !previousGamepad1.triangle && !abort && specTimer2.seconds() < 1 && specTimer2.seconds() > 0.1 && specAction2) {
+            } else if (currentGamepad1.triangle && !previousGamepad1.triangle && !abort && specTimer2.seconds() < 1 && specTimer2.seconds() > 0.1 && specAction2) { //this is an abort. when the claw is at the specimen pickup position and you press triangle again. If u miss, you have 1 second to abort. it will reset you to the specimen pickup position
                 abort = true;
                 slidesSpecDown = true;
                 slidesSpecUp = false;
@@ -310,7 +310,7 @@ boolean pidActive = false;
 
             }
 
-            if (vertouch.isPressed() && vertSlideL.getCurrentPosition() != 0 && vertSlideR.getCurrentPosition() != 0) {
+            if (vertouch.isPressed() && vertSlideL.getCurrentPosition() != 0 && vertSlideR.getCurrentPosition() != 0) { //slide reset
                 vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
