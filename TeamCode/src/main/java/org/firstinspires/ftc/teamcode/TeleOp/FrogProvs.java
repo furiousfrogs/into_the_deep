@@ -24,6 +24,9 @@ public class FrogProvs extends OpMode {
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
 double targetPosition = 0;
+
+    double transferTime = 0.2;
+boolean abort = false;
     boolean specReady = false;
     boolean spec = false;
     boolean sample = true;
@@ -112,12 +115,14 @@ boolean pidActive = false;
         vertSlideL = hardwareMap.get(DcMotor.class, "leftvertical");
         vertSlideL.setDirection(DcMotor.Direction.FORWARD);
         vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vertSlideL.setTargetPosition(0);
         vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         vertSlideR = hardwareMap.get(DcMotor.class, "rightvertical");
         vertSlideR.setDirection(DcMotor.Direction.REVERSE);
         vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vertSlideR.setTargetPosition(0);
         vertSlideR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -200,10 +205,23 @@ boolean pidActive = false;
                 claw.setPosition(var.clawClose);
                 transferAction = true;
                 transferTimer.reset();
-            } else if (currentGamepad1.circle && !previousGamepad1.circle && !slidesDown) {
+            } else if (currentGamepad1.circle && !previousGamepad1.circle && !slidesDown && !slidesSpecDown) {
                 claw.setPosition(var.clawOpen);
                 outtakeAction = true;
                 outtakeTimer.reset();
+                transferTime = 0.2;
+            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecDown) {
+                outArm.setPosition(var.armTransfer);
+                wrist.setPosition(var.wristTransfer);
+                claw.setPosition(var.clawClose);
+                outtakeAction = true;
+                outtakeTimer.reset();
+                transferTime = 0.4;
+            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecUp) {
+                outtakeAction = true;
+                outtakeTimer.reset();
+                spec = false;
+                specReady = false;
             }
 
             if (transferAction && transferTimer.seconds() > 0.2) {
@@ -218,7 +236,7 @@ boolean pidActive = false;
                 transferAction = false;
             }
 
-            if (outtakeAction && outtakeTimer.seconds() > 0.2) {
+            if (outtakeAction && outtakeTimer.seconds() > transferTime) {
                 outArm.setPosition(var.armTransfer);
                 wrist.setPosition(var.wristTransfer);
                 vertSlideL.setPower(1);
@@ -230,6 +248,7 @@ boolean pidActive = false;
                 slidesDown = true;
                 slidesUp = false;
                 outtakeAction = false;
+                claw.setPosition(var.clawOpen);
                // sample = false;
             }
 
@@ -249,16 +268,12 @@ boolean pidActive = false;
 
 
                 } else if (slidesSpecDown && !slidesSpecUp && !spec && !specReady) {
-                    spec = true;
+
                     claw.setPosition(var.clawClose);
-                    vertSlideL.setPower(1);
-                    vertSlideR.setPower(1);
-                    vertSlideL.setTargetPosition(1300);
-                    vertSlideR.setTargetPosition(1300);
-                    slidesSpecDown = false;
-                    slidesSpecUp = true;
                     specTimer2.reset();
                     specAction2 = true;
+                    spec = true;
+                    abort = false;
 
                 } else if (slidesSpecUp && specReady) {
                     claw.setPosition(var.clawOpen);
@@ -267,19 +282,32 @@ boolean pidActive = false;
                 }
             }
 
-            if (specAction && specTimer.seconds() > 1) {
+            if (specAction && specTimer.seconds() > 0.5) {
                 claw.setPosition(var.clawOpenWide);
                 slidesSpecDown = true;
                 slidesSpecUp = false;
                 specAction = false;
             }
-            if (specAction2 && specTimer2.seconds() > 1) {
+            if (specAction2 && specTimer2.seconds() > 1 && !abort) {
                 outArm.setPosition(var.armSpecScore);
                 wrist.setPosition(var.wristSpecScore);
+                vertSlideL.setPower(1);
+                vertSlideR.setPower(1);
+                vertSlideL.setTargetPosition(1600);
+                vertSlideR.setTargetPosition(1600);
                 slidesSpecUp = true;
                 slidesSpecDown = false;
                 specReady = true;
                 specAction2 = false;
+            } else if (currentGamepad1.triangle && !previousGamepad1.triangle && !abort && specTimer2.seconds() < 1 && specTimer2.seconds() > 0.1 && specAction2) {
+                abort = true;
+                slidesSpecDown = true;
+                slidesSpecUp = false;
+                specReady = false;
+                spec = false;
+                specAction2 = false;
+                claw.setPosition(var.clawOpenWide);
+
             }
 
             if (vertouch.isPressed() && vertSlideL.getCurrentPosition() != 0 && vertSlideR.getCurrentPosition() != 0) {
