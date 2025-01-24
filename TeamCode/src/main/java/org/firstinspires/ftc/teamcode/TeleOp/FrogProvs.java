@@ -189,6 +189,9 @@ boolean pidActive = false;
             backLeft.setPower(backLeftPower);
             backRight.setPower(backRightPower);
         }
+
+
+        
         public void manualTake () {
             //manual controls
 
