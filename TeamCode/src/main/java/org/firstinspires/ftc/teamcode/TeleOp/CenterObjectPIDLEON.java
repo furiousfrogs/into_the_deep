@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "CenterObjectPID", group = "TeleOp")
+@TeleOp(name = "CenterObjectPIDLEON", group = "TeleOp")
 public class CenterObjectPIDLEON extends OpMode {
 
     private static final int READ_PERIOD = 2; // Rate limit in seconds

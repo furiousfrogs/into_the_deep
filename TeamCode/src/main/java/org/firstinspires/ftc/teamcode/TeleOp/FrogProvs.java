@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;//importing libraries
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -22,26 +23,28 @@ public class FrogProvs extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
+double targetPosition = 0;
+    boolean specReady = false;
+    boolean spec = false;
+    boolean sample = true;
+    boolean slidesUp = false;
+    boolean slidesDown = true;
+    boolean slidesSpecDown = false;
+boolean slidesSpecUp = false;
 
 
-    boolean sample = false;
-    private ElapsedTime timer;
-    // Declare globally to maintain state across iterations
-    private ElapsedTime InitTime = new ElapsedTime();
-    boolean InitAct = false;
-    boolean Transfer1action = false;
-    private ElapsedTime Transfer1Timer = new ElapsedTime();
-    boolean Transfer2action = false;
-    private ElapsedTime Transfer2Timer = new ElapsedTime();
-    private ElapsedTime Transfer3Timer = new ElapsedTime();
-    boolean Transfer3action = false;
-    boolean OuttakeAction = false;
-    private ElapsedTime OuttakeTimer = new ElapsedTime();
-    private ElapsedTime Transfer4Timer = new ElapsedTime();
-    boolean Transfer4action = false;
+    boolean transferAction = false;
+    private ElapsedTime transferTimer = new ElapsedTime();
 
-    boolean OuttakeAction2 = false;
-    private ElapsedTime OuttakeTimer2 = new ElapsedTime();
+    boolean outtakeAction = false;
+    private ElapsedTime outtakeTimer = new ElapsedTime();
+
+    boolean specAction = false;
+    private ElapsedTime specTimer = new ElapsedTime();
+
+    boolean specAction2 = false;
+    private ElapsedTime specTimer2 = new ElapsedTime();
+
 
     private int dynamicLimit = 1300;
     private boolean limitCalculated = false;
@@ -51,7 +54,7 @@ public class FrogProvs extends OpMode {
 
     private BHI260IMU imu;
 
-    private ColorRangeSensor coloursensor;
+//    private ColorRangeSensor coloursensor;
     private TouchSensor hortouch;
     private TouchSensor vertouch;
     boolean resethor = false;
@@ -63,23 +66,11 @@ public class FrogProvs extends OpMode {
     Gamepad previousGamepad2;
 
 
-
+boolean pidActive = false;
 
     @Override
     public void init() {
 
-        imu = hardwareMap.get(BHI260IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT)
-        );
-
-
-        imu.initialize(parameters);
-
-
-        timer = new ElapsedTime();
 
         frontLeft = hardwareMap.get(DcMotor.class, "front_left");
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -110,7 +101,7 @@ public class FrogProvs extends OpMode {
 
         claw = hardwareMap.get(Servo.class, "claw");
         claw.setDirection(Servo.Direction.FORWARD);
-        claw.setPosition(var.ClawOpen);
+        claw.setPosition(var.clawOpen);
 
         horSlide = hardwareMap.get(DcMotor.class, "righthor");
         horSlide.setDirection(DcMotor.Direction.REVERSE);
@@ -121,13 +112,13 @@ public class FrogProvs extends OpMode {
         vertSlideL = hardwareMap.get(DcMotor.class, "leftvertical");
         vertSlideL.setDirection(DcMotor.Direction.FORWARD);
         vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vertSlideL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         vertSlideR = hardwareMap.get(DcMotor.class, "rightvertical");
         vertSlideR.setDirection(DcMotor.Direction.REVERSE);
         vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vertSlideR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vertSlideR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         intake = hardwareMap.get(DcMotor.class, "intake");
@@ -142,106 +133,180 @@ public class FrogProvs extends OpMode {
 
         hortouch = hardwareMap.get(TouchSensor.class, "hortouch");
         vertouch = hardwareMap.get(TouchSensor.class, "vertouch");
-        coloursensor = hardwareMap.get(ColorRangeSensor.class, "coloursensor");
-        timer.reset();
+//        coloursensor = hardwareMap.get(ColorRangeSensor.class, "coloursensor");
 
     }
-//        public void drive () {
-//
-//            double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
-//
-//            boolean slow = gamepad1.options;
-//            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-//            double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-//            double rx = (gamepad1.right_trigger - gamepad1.left_trigger) / turnvar;
-//
-//
-//            double slowvar = 2.0; // Slow mode divisor
-//            double speedFactor = slow ? 1 / slowvar : 1;
-//
-//
-//            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
-//
-//
-//            // Denominator is the largest motor power (absolute value) or 1
-//            // This ensures all the powers maintain the same ratio,
-//            // but only if at least one is out of the range [-1, 1]
-//
-//            double frontLeftPower = (y + x + rx) / denominator * speedFactor * 0.8;
-//            double backLeftPower = (y - x + rx) / denominator * speedFactor * 0.8;
-//            double frontRightPower = (y - x - rx) / denominator * speedFactor * 0.8;
-//            double backRightPower = (y + x - rx) / denominator * speedFactor * 0.8;
-//
-//
-//            // Normalize motor powers
-//            double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower),
-//                    Math.max(Math.abs(backLeftPower), Math.abs(backRightPower))));
-//            if (maxPower > 1.0) {
-//                frontLeftPower /= maxPower;
-//                frontRightPower /= maxPower;
-//                backLeftPower /= maxPower;
-//                backRightPower /= maxPower;
-//            }
-//            if (vertSlideL.getCurrentPosition() > 2000) {
-//                frontLeftPower = frontLeftPower / 2;
-//                frontRightPower = frontRightPower / 2;
-//                backLeftPower = backLeftPower / 2;
-//                backRightPower = backRightPower / 2;
-//            }
-//            // Set motor powers
-//            frontLeft.setPower(frontLeftPower);
-//            frontRight.setPower(frontRightPower);
-//            backLeft.setPower(backLeftPower);
-//            backRight.setPower(backRightPower);
-//        }
+        public void drive () {
+
+            double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
+
+            boolean slow = gamepad1.options;
+            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+            double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+            double rx = (gamepad1.right_trigger - gamepad1.left_trigger) / turnvar;
+
+
+            double slowvar = 2.0; // Slow mode divisor
+            double speedFactor = slow ? 1 / slowvar : 1;
+
+
+            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
+
+
+            // Denominator is the largest motor power (absolute value) or 1
+            // This ensures all the powers maintain the same ratio,
+            // but only if at least one is out of the range [-1, 1]
+
+            double frontLeftPower = (y + x + rx) / denominator * speedFactor * 0.8;
+            double backLeftPower = (y - x + rx) / denominator * speedFactor * 0.8;
+            double frontRightPower = (y - x - rx) / denominator * speedFactor * 0.8;
+            double backRightPower = (y + x - rx) / denominator * speedFactor * 0.8;
+
+
+            // Normalize motor powers
+            double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower),
+                    Math.max(Math.abs(backLeftPower), Math.abs(backRightPower))));
+            if (maxPower > 1.0) {
+                frontLeftPower /= maxPower;
+                frontRightPower /= maxPower;
+                backLeftPower /= maxPower;
+                backRightPower /= maxPower;
+            }
+            if (vertSlideL.getCurrentPosition() > 2000) {
+                frontLeftPower = frontLeftPower / 2;
+                frontRightPower = frontRightPower / 2;
+                backLeftPower = backLeftPower / 2;
+                backRightPower = backRightPower / 2;
+            }
+            // Set motor powers
+            frontLeft.setPower(frontLeftPower);
+            frontRight.setPower(frontRightPower);
+            backLeft.setPower(backLeftPower);
+            backRight.setPower(backRightPower);
+        }
         public void manualTake () {
             //manual controls
 
-            // Store previous state
             previousGamepad1.copy(currentGamepad1);
-            // Update current state with the latest gamepad data
             currentGamepad1.copy(gamepad1);
 
-            // Store previous state
             previousGamepad2.copy(currentGamepad2);
-            // Update current state with the latest gamepad data
             currentGamepad2.copy(gamepad2);
-            if (vertSlideL.getCurrentPosition() > 1000) {
+
+//circle is the outtake button
+            // if sample boolean is true, one press will bring the arm up and another press will lower it
+
+            if (currentGamepad1.circle && !previousGamepad1.circle && sample && !slidesUp) {
+                claw.setPosition(var.clawClose);
+                transferAction = true;
+                transferTimer.reset();
+            } else if (currentGamepad1.circle && !previousGamepad1.circle && !slidesDown) {
+                claw.setPosition(var.clawOpen);
+                outtakeAction = true;
+                outtakeTimer.reset();
+            }
+
+            if (transferAction && transferTimer.seconds() > 0.2) {
+                vertSlideL.setPower(1);
+                vertSlideR.setPower(1);
+                vertSlideL.setTargetPosition(1800);
+                vertSlideR.setTargetPosition(1800);
                 outArm.setPosition(var.armOut);
                 wrist.setPosition(var.wristOut);
-            } else if (vertSlideL.getCurrentPosition() < 1000 && vertSlideL.getPower() < 0 ) {
+                slidesDown = false;
+                slidesUp = true;
+                transferAction = false;
+            }
+
+            if (outtakeAction && outtakeTimer.seconds() > 0.2) {
                 outArm.setPosition(var.armTransfer);
                 wrist.setPosition(var.wristTransfer);
+                vertSlideL.setPower(1);
+                vertSlideR.setPower(1);
+                vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                vertSlideR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                vertSlideL.setTargetPosition(0);
+                vertSlideR.setTargetPosition(0);
+                slidesDown = true;
+                slidesUp = false;
+                outtakeAction = false;
+               // sample = false;
+            }
 
+
+            //triangle is the specimen scoring position
+            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                if (!slidesSpecDown && !spec && !specReady) {
+                    claw.setPosition(var.clawClose);
+                    vertSlideL.setPower(1);
+                    vertSlideR.setPower(1);
+                    vertSlideL.setTargetPosition(1000);
+                    vertSlideR.setTargetPosition(1000);
+                    outArm.setPosition(var.armSpec);
+                    wrist.setPosition(var.wristSpec);
+                    specTimer.reset();
+                    specAction = true;
+
+
+                } else if (slidesSpecDown && !slidesSpecUp && !spec && !specReady) {
+                    spec = true;
+                    claw.setPosition(var.clawClose);
+                    vertSlideL.setPower(1);
+                    vertSlideR.setPower(1);
+                    vertSlideL.setTargetPosition(1300);
+                    vertSlideR.setTargetPosition(1300);
+                    slidesSpecDown = false;
+                    slidesSpecUp = true;
+                    specTimer2.reset();
+                    specAction2 = true;
+
+                } else if (slidesSpecUp && specReady) {
+                    claw.setPosition(var.clawOpen);
+                    specReady = false;
+                    spec = false;
+                }
             }
-if (vertouch.isPressed()) {
-    vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    vertSlideL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    vertSlideR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-}
-            if ((currentGamepad1.cross && !previousGamepad1.cross)  && claw.getPosition() == var.ClawOpen) {
-                claw.setPosition(var.ClawClose);
-            } else if (currentGamepad1.cross && !previousGamepad1.cross) {
-                claw.setPosition(var.ClawOpen);
+
+            if (specAction && specTimer.seconds() > 1) {
+                claw.setPosition(var.clawOpenWide);
+                slidesSpecDown = true;
+                slidesSpecUp = false;
+                specAction = false;
             }
-            vertSlideL.setPower(gamepad1.right_stick_x);
-            vertSlideR.setPower(gamepad1.right_stick_x);
+            if (specAction2 && specTimer2.seconds() > 1) {
+                outArm.setPosition(var.armSpecScore);
+                wrist.setPosition(var.wristSpecScore);
+                slidesSpecUp = true;
+                slidesSpecDown = false;
+                specReady = true;
+                specAction2 = false;
+            }
+
+            if (vertouch.isPressed() && vertSlideL.getCurrentPosition() != 0 && vertSlideR.getCurrentPosition() != 0) {
+                vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                vertSlideR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+
+
 
             horSlide.setPower(gamepad1.left_stick_x);
+            }
 
-// Clamp target position to safe limits
 
-        }
+
 
     public void Telemetry() {
             telemetry.addData("vert", vertSlideL.getCurrentPosition());
-
+            if (vertouch.isPressed()) {
+                telemetry.addLine("touch joe");
+            }
 
     }
     @Override
     public void loop () {
-//        drive();
+        drive();
         manualTake();
         Telemetry();
     }

@@ -20,16 +20,25 @@ public class var {
     public static float armOut = 0.85F;
     public static float armTransfer = 0.4F;
     public static float armSpec = 0.02F;
-
+    public static float armSpecScore = 0.5F;
 
     //Bigger number - claw is open
-    public static float ClawClose = 0.63F;
-    public static float ClawOpen = 0.45F;
+    public static float clawClose = 0.63F;
+    public static float clawOpen = 0.45F;
+    public static float clawOpenWide = 0.3F;
 
     //Bigger number - wrist goes out
     public static float wristTransfer = 0.23F;
     public static float wristOut = 1F;
     public static float wristSpec = 0.3F;
+    public static float wristSpecScore = 0.55F;
+
+    //Slide Positions
+    public static float slideDeposit = 1300F;
+    public static float slideTransfer = 0F;
+    public static float slideSpecPickup = 500F;
+    public static float slideSpecScore = 1000F;
+
 
     // slide PID coefficients
     public static double kP = 0.005; // Proportional gain
