@@ -22,7 +22,7 @@ public class Initialization {
     Gamepad currentGamepad1;
     Gamepad previousGamepad1;
     Gamepad currentGamepad2;
-    Gamepad previousgamepad2;
+    Gamepad previousGamepad2;
 
     public void initialize(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         //initalized stuff
@@ -91,12 +91,12 @@ public class Initialization {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         gate=hardwareMap.get(Servo.class,"gate");
-        gate.setdirection(Servo.direction.FORWARD);
+        gate.setDirection(Servo.Direction.FORWARD);
 
         currentGamepad1 =gamepad1;
         previousGamepad1.copy(currentGamepad1);
         currentGamepad2 =gamepad2;
-        previousgamepad2.copy(currentGamepad2);
+        previousGamepad2.copy(currentGamepad2);
 
 
         hortouch=hardwareMap.get(TouchSensor.class,"horTouch");

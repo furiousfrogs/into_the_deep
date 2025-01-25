@@ -1,14 +1,14 @@
 package org.firstinspires.ftc.teamcode.codeMethodized;
 
-private float state=0.0F;
-private boolean direction=true; //true is positive (samples), false is negative (specimen)
 
 public class Take {
+    private float state=0.0F;
+    private boolean direction=true;//true is positive (samples), false is negative (specimen)
     public void manualTake(Initialization initModule){
-        if(initModule.currentGamepad1.triangle.ispressed()){
+        if(initModule.currentGamepad1.triangle){
             initModule.target= !initModule.target;
         }
-        if(initModule.currentGamepad1.square.isPressed()){
+        if(initModule.currentGamepad1.square){
             initModule.color= !initModule.color;
         }
         //manual controlled
@@ -30,7 +30,7 @@ public class Take {
         initModule.currentGod[10]=-initModule.currentGamepad2.left_stick_y;
         initModule.currentGod[11]=-initModule.currentGamepad2.left_stick_y;
         if(initModule.currentGamepad2.circle && ! initModule.previousGamepad2.circle){
-            if(initModule.currentGod[12]=VarAll.inIdle){
+            if(initModule.currentGod[12]==VarAll.inIdle){
                 initModule.currentGod[12]=VarAll.inDown;
             }else{
                 initModule.currentGod[12]=VarAll.inIdle;
@@ -41,7 +41,7 @@ public class Take {
         }
         
         //state controlled
-        if(state=0.0F){
+        if(state==0.0F){
 
         }
         //safety controlled
