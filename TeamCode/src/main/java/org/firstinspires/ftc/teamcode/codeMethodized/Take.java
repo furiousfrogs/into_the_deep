@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.codeMethodized;
 
+private float state=0.0F;
+private boolean direction=true; //true is positive (samples), false is negative (specimen)
+
 public class Take {
     public void manualTake(Initialization initModule){
         if(initModule.currentGamepad1.triangle.ispressed()){
@@ -38,6 +41,9 @@ public class Take {
         }
         
         //state controlled
+        if(state=0.0F){
+
+        }
         //safety controlled
         //reset controlled
     }
