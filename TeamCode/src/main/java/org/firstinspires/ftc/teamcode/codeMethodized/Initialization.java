@@ -9,13 +9,13 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 public class Initialization {
     public DcMotor frontLeft,frontRight,backLeft,backRight;
-    public Servo leftIn, rightIn, wrist, outArm, claw;
+    public Servo leftIn, rightIn, wrist, outArm, claw, gate;
     public DcMotor horSlide,vertSlideL, vertSlideR, intake;
     public ColorRangeSensor coloursensor;
     public TouchSensor hortouch;
     public TouchSensor vertouch;
     //variables
-    double[] currentGod = VarAll.initPos; //NEEDS TO BE CHANGED!!!!!!!!!!!!!!!!!!!!!!!!!
+    double[] currentGod = VarAll.initPos;
     double[] previousGod = currentGod;
     Gamepad currentGamepad1;
     Gamepad previousGamepad1;
@@ -50,15 +50,12 @@ public class Initialization {
 
         outArm=hardwareMap.get(Servo.class,"outArm");
         outArm.setDirection(Servo.Direction.FORWARD);
-        outArm.setPosition(0.3F); //REMOVE LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         wrist=hardwareMap.get(Servo.class,"wrist");
         wrist.setDirection(Servo.Direction.FORWARD);
-        wrist.setPosition(0.7F); //REMOVE LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         claw=hardwareMap.get(Servo.class,"claw");
         claw.setDirection(Servo.Direction.FORWARD);
-        claw.setPosition(0.6F); //REMOVE LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
         horSlide=hardwareMap.get(DcMotor.class,"rightHor");
@@ -90,6 +87,9 @@ public class Initialization {
         intake.setDirection(DcMotor.Direction.FORWARD);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        gate=hardwareMap.get(Servo.class,"gate");
+        gate.setdirection(Servo.direction.FORWARD);
 
         currentGamepad1 =gamepad1;
         previousGamepad1 =new Gamepad();
