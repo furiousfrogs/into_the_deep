@@ -17,6 +17,8 @@ public class Initialization {
     //variables
     double[] currentGod = VarAll.initPos;
     double[] previousGod = currentGod;
+    boolean target=false; //false is specimen, true is sample
+    boolean color=false;  //false is blue, true is red
     Gamepad currentGamepad1;
     Gamepad previousGamepad1;
     Gamepad currentGamepad2;

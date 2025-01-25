@@ -12,5 +12,17 @@ step is a variable denoting what step of the transfer the robot is currently on
 
 Main calls init and initialization and loop
 loop calls calculate and communicate
-calculate is meant to determine how the robot should act based on input
 communicate tells the robot how to act.
+calculate calls drive and take 
+drive moves the robot around
+take controls all other ahrdware components
+
+target: false=specimen, true=sample
+color: false=blue, true=red
+
+
+heiarchy:
+manual control
+state control
+safety control
+reset control
