@@ -9,12 +9,14 @@ public class var {
     public static float TransferDTime = 0.5F;
     public static float OuttakeTime = 0.3F;
     public static float OuttakeTime2 = 0.5F;
+
+    public static float gateOpen = 0F;
+    public static float gateClose = 0.3F;
+
     //Bigger number - intake is lower
-    public static float InDown = 0.565F;
-    public static float InUp = 0.2F;
-    public static float InTransfer = 0.235F;
-    public static float InWait = 0.44F; //this is the position where the intake arm waits for the outtake arm to go down
-    public static float InWait2 = 0.3F; // this is for square when slide is retracted
+    public static float inDown = 0.69F;
+    public static float intransfer = 0.1F;
+    public static float inIdle = 0.4F;
 
     //Bigger number - arm is lower
     public static float armOut = 0.85F;

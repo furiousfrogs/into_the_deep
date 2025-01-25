@@ -21,10 +21,12 @@ import org.firstinspires.ftc.teamcode.var;
 @TeleOp(name = "FrogProvs", group= "TeleOp")
 public class FrogProvs extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-    private Servo leftIn, rightIn, wrist, outArm, claw;
+    private Servo leftIn, rightIn, wrist, outArm, claw, gate;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
 double targetPosition = 0;
 
+
+boolean intakeAbort = false;
     double transferTime = 0.2;
 boolean abort = false;
     boolean specReady = false;
@@ -35,6 +37,10 @@ boolean abort = false;
     boolean slidesSpecDown = false;
 boolean slidesSpecUp = false;
 
+boolean intakeAction2 = false;
+
+boolean intakeAction = false;
+private ElapsedTime intakeTimer = new ElapsedTime();
 
     boolean transferAction = false;
     private ElapsedTime transferTimer = new ElapsedTime();
@@ -68,7 +74,14 @@ boolean slidesSpecUp = false;
     Gamepad currentGamepad2;
     Gamepad previousGamepad2;
 
+public enum intakeState {
+    intakeIdle,
+    intaking,
+    intakeTransfering,
+    intakeAbort;
+}
 
+intakeState currentIntakeState = intakeState.intakeIdle;
 boolean pidActive = false;
 
     @Override
@@ -100,7 +113,9 @@ boolean pidActive = false;
         wrist.setDirection(Servo.Direction.FORWARD);
         wrist.setPosition(var.wristTransfer);
 
-
+        gate = hardwareMap.get(Servo.class, "gate");
+        gate.setDirection(Servo.Direction.FORWARD);
+        gate.setPosition(var.gateClose);
 
         claw = hardwareMap.get(Servo.class, "claw");
         claw.setDirection(Servo.Direction.FORWARD);
@@ -201,7 +216,7 @@ boolean pidActive = false;
             previousGamepad2.copy(currentGamepad2);
             currentGamepad2.copy(gamepad2);
 
-//circle is the outtake button
+            //circle is the outtake button
             // if sample boolean is true, one press will bring the arm up and another press will lower it
 
             if (currentGamepad1.circle && !previousGamepad1.circle && sample && !slidesUp) {   //this will raise the slides to the deposit position. the timer is caused so there is a 0.2 second delay between when you grab the sample and when u move the slides.
@@ -312,6 +327,81 @@ boolean pidActive = false;
                 claw.setPosition(var.clawOpenWide);
 
             }
+
+            switch (currentIntakeState) {
+                case intakeIdle:
+                    if (currentGamepad1.cross && !previousGamepad1.cross || intakeAbort) {
+                        gate.setPosition(var.gateClose);
+                        intake.setPower(1);
+                        leftIn.setPosition(var.inDown);
+                        rightIn.setPosition(var.inDown);
+                        currentIntakeState = intakeState.intaking;
+                        intakeAbort = false;
+                    }
+                    break;
+                case intaking:
+                    if (currentGamepad1.cross && !previousGamepad1.cross) {
+                        leftIn.setPosition(var.intransfer);
+                        rightIn.setPosition(var.intransfer);
+                        currentIntakeState = intakeState.intakeTransfering;
+                        intakeTimer.reset();
+                    }
+                    break;
+                case intakeTransfering:
+
+                    if (intakeTimer.seconds() < 1 && currentGamepad1.cross && !previousGamepad1.cross) {
+                        intakeAbort = true;
+                        currentIntakeState = intakeState.intakeIdle;
+                        break;
+                    } else if (2 > intakeTimer.seconds() && intakeTimer.seconds() > 1) {
+                        gate.setPosition(var.gateOpen);
+                        intake.setPower(1);
+                    } else if (intakeTimer.seconds() > 2) {
+                        gate.setPosition(var.gateOpen);
+                        leftIn.setPosition(var.inIdle);
+                        rightIn.setPosition(var.inIdle);
+                        intake.setPower(0);
+                        currentIntakeState = intakeState.intakeIdle;
+                    }
+                    break;
+            }
+
+
+//if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+//    if (currentIntakeState == intakeState.intakeIdle || currentIntakeState == intakeState.intakeTransfering) {
+//        gate.setPosition(var.gateClose);
+//        intake.setPower(1);
+//        leftIn.setPosition(var.inDown);
+//        rightIn.setPosition(var.inDown);
+//        currentIntakeState = intakeState.intaking;
+//    } else if (currentIntakeState == intakeState.intaking) {
+//        leftIn.setPosition(var.intransfer);
+//        rightIn.setPosition(var.intransfer);
+//        currentIntakeState = intakeState.intakeTransfering;
+//        intakeAction = true;
+//        intakeTimer.reset();
+//    }
+//}
+//if (intakeAction && intakeTimer.seconds() < 1) {
+//    intakeAction = false;
+//
+//}
+//if (intakeAction && currentIntakeState == intakeState.intakeTransfering && intakeTimer.seconds() > 1) {
+//    gate.setPosition(var.gateOpen);
+//    intake.setPower(1);
+//    intakeAction = false;
+//    intakeAction2 = true;
+//    sample = true;
+//}
+//
+//if (intakeAction2 && intakeTimer.seconds() > 2) {
+//    gate.setPosition(var.gateOpen);
+//    leftIn.setPosition(var.inIdle);
+//    rightIn.setPosition(var.inIdle);
+//    intake.setPower(0);
+//    intakeAction2 = false;
+//    currentIntakeState = intakeState.intakeIdle;
+//}
 
             if (vertouch.isPressed() && vertSlideL.getCurrentPosition() != 0 && vertSlideR.getCurrentPosition() != 0) { //slide reset
                 vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
