@@ -9,3 +9,4 @@ public class Calculate {
         initModule.previousGamepad1.copy(initModule.currentGamepad1);
     }
 }
+
