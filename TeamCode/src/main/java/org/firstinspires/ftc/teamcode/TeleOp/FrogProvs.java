@@ -206,8 +206,7 @@ boolean pidActive = false;
 
 
             // Normalize motor powers
-            double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower),
-                    Math.max(Math.abs(backLeftPower), Math.abs(backRightPower))));
+            double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower),Math.max(Math.abs(backLeftPower), Math.abs(backRightPower))));
             if (maxPower > 1.0) {
                 frontLeftPower /= maxPower;
                 frontRightPower /= maxPower;
@@ -227,6 +226,7 @@ boolean pidActive = false;
             backRight.setPower(backRightPower);
         }
 
+    
 
         
         public void manualTake () {
