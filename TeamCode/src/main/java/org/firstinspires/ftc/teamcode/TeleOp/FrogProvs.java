@@ -351,107 +351,113 @@ boolean pidActive = false;
 //            }
 
 
-//switch (currentArmState) {
-//    case armIdle:
-//        vertSlideL.setPower(1);
-//        vertSlideR.setPower(1);
-//        vertSlideL.setTargetPosition(0);
-//        vertSlideR.setTargetPosition(0);
-//        if (currentGamepad1.circle && !previousGamepad1.circle) {
-//            currentArmState = armState.armOuttaking;
-//        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-//            currentArmState = armState.armSpec;
-//        } break;
-//    case armTransfering:
-//        claw.setPosition(var.clawOpen);
-//        transferAction = false;
-//        if (outArm.getPosition() == var.armSpec) {
-//            claw.setPosition(var.clawClose);
-//
-//            vertSlideL.setPower(1);
-//            vertSlideR.setPower(1);
-//            vertSlideL.setTargetPosition(1000);
-//            vertSlideR.setTargetPosition(1000);
-//            transferAction = true;
-//            transferTimer.reset();
-//        } else {
-//            vertSlideL.setPower(1);
-//            vertSlideR.setPower(1);
-//            vertSlideL.setTargetPosition(0);
-//            vertSlideR.setTargetPosition(0);
-//            claw.setPosition(var.clawOpen);
-//            outArm.setPosition(var.armTransfer);
-//            wrist.setPosition(var.wristTransfer);
-//        }
-//        if (transferAction && transferTimer.seconds() > 0.5) {
-//                 outArm.setPosition(var.armTransfer);
-//                 wrist.setPosition(var.wristTransfer);
-//                 claw.setPosition(var.clawOpen);
-//                 transferAction = false;
-//        } else if (!transferAction) {
-//            if (currentGamepad1.circle && !previousGamepad1.circle) {
-//                currentArmState = armState.armOuttaking;
-//            } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-//                currentArmState = armState.armSpec;
-//            }
-//        } break;
-//    case armOuttaking:
-//        claw.setPosition(var.clawClose);
-//        vertSlideL.setPower(1);
-//        vertSlideR.setPower(1);
-//        vertSlideL.setTargetPosition(2000);
-//        vertSlideR.setTargetPosition(2000);
-//        if (vertSlideL.getCurrentPosition() > 500) {
-//            outArm.setPosition(var.armOut);
-//            wrist.setPosition(var.wristOut);
-//            if (currentGamepad1.circle && !previousGamepad1.circle) {
-//                currentArmState = armState.armTransfering;
-//            } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-//                currentArmState = armState.armSpec;
-//            }
-//        } break;
-//    case armSpec:
-//        claw.setPosition(var.clawClose);
-//        vertSlideL.setPower(1);
-//        vertSlideR.setPower(1);
-//        vertSlideL.setTargetPosition(1000);
-//        vertSlideR.setTargetPosition(1000);
-//        if (vertSlideL.getCurrentPosition() > 500) {
-//            outArm.setPosition(var.armSpec);
-//            wrist.setPosition(var.wristSpec);
-//            specAction2 = true;
-//            specTimer2.reset();
-//            if (specAction2 && specTimer2.seconds() > 1) {
-//                specAction2 = false;
-//                claw.setPosition(var.clawOpenWide);
-//                if (currentGamepad1.circle && !previousGamepad1.circle) {
-//                    currentArmState = armState.armTransfering;
-//                } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-//                    currentArmState = armState.armSpecScore;
-//                }
-//            }
-//        } break;
-//    case armSpecScore:
-//        vertSlideL.setPower(1);
-//        vertSlideR.setPower(1);
-//        vertSlideL.setTargetPosition(1500);
-//        vertSlideR.setTargetPosition(1500);
-//        claw.setPosition(var.clawClose);
-//        specAction = true;
-//        specTimer.reset();
-//        if (specAction && specTimer.seconds() > 1) {
-//            specAction = false;
-//            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-//                claw.setPosition(var.clawOpen);
-//                if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-//                    currentArmState = armState.armSpec;
-//                } else if (currentGamepad1.circle && !previousGamepad1.circle){
-//                    currentArmState = armState.armTransfering;
-//                }
-//            }
-//        }
-//        break;
-//}
+switch (currentArmState) {
+  case armIdle:
+        vertSlideL.setPower(1);
+        vertSlideR.setPower(1);
+        vertSlideL.setTargetPosition(0);
+        vertSlideR.setTargetPosition(0);
+        if (currentGamepad1.circle && !previousGamepad1.circle) {
+            currentArmState = armState.armOuttaking;
+        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+            currentArmState = armState.armSpec;
+        } break;
+    case armTransfering:
+
+		if (currentGamepad1.circle && !previousGamepad1.circle) {
+			claw.setPosition(var.clawClose);
+   		    vertSlideL.setPower(1);
+  	      	vertSlideR.setPower(1);
+        	vertSlideL.setTargetPosition(2000);
+        	vertSlideR.setTargetPosition(2000);
+            outArm.setPosition(var.armOut);
+            wrist.setPosition(var.wristOut);
+            currentArmState = armState.armOuttaking;
+			}
+
+		if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+			claw.setPosition(var.clawClose);
+			vertSlideL.setPower(1);
+  	      	vertSlideR.setPower(1);
+        	vertSlideL.setTargetPosition(2000);
+        	vertSlideR.setTargetPosition(2000);
+			specAction = true
+        }
+
+		if (specAction && vertSlideL.getPosition() > 500) {
+			arm.setPosition(var.armSpec);
+			wrist.setPosition(var.wristSpec);
+			specAction2 = true
+			specTimer2.reset()
+		}
+
+		if (specAction2 && specTimer2.seconds() > 1) {
+			claw.setPosition(var.clawOpen);
+			currentArmState = armState.armSpec;
+		
+        } break;
+    case armOuttaking:
+        
+            if (currentGamepad1.circle && !previousGamepad1.circle) {
+				claw.setposition(var.clawOpen);
+				outArm.setPosition(var.armTransfer);
+				wrist.setPosition(var.wristTransfer);
+				vertSlideL.setPower(1);
+  	      		vertSlideR.setPower(1);
+        		vertSlideL.setTargetPosition(0);
+        		vertSlideR.setTargetPosition(0);
+                currentArmState = armState.armTransfering;
+
+
+            } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //unfinshed
+				
+                currentArmState = armState.armSpec;
+            }
+        } break;
+    case armSpec: //unfininshed
+        claw.setPosition(var.clawClose);
+        vertSlideL.setPower(1);
+        vertSlideR.setPower(1);
+        vertSlideL.setTargetPosition(1000);
+        vertSlideR.setTargetPosition(1000);
+        if (vertSlideL.getCurrentPosition() > 500) {
+            outArm.setPosition(var.armSpec);
+            wrist.setPosition(var.wristSpec);
+            specAction2 = true;
+            specTimer2.reset();
+            if (specAction2 && specTimer2.seconds() > 1) {
+                specAction2 = false;
+                claw.setPosition(var.clawOpenWide);
+                if (currentGamepad1.circle && !previousGamepad1.circle) {
+                    currentArmState = armState.armTransfering;
+                } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                    currentArmState = armState.armSpecScore;
+                }
+            }
+        } break;
+    case armSpecScore: //unfinished
+        vertSlideL.setPower(1);
+        vertSlideR.setPower(1);
+        vertSlideL.setTargetPosition(1500);
+        vertSlideR.setTargetPosition(1500);
+        claw.setPosition(var.clawClose);
+        specAction = true;
+        specTimer.reset();
+        if (specAction && specTimer.seconds() > 1) {
+            specAction = false;
+            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                claw.setPosition(var.clawOpen);
+                if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                    currentArmState = armState.armSpec;
+                } else if (currentGamepad1.circle && !previousGamepad1.circle){
+                    currentArmState = armState.armTransfering;
+                }
+            }
+        }
+        break;
+}
+
+
             switch (currentIntakeState) {
                 case intakeIdle:
                     if (currentGamepad1.cross && !previousGamepad1.cross || intakeAbort) { //nigga intake
