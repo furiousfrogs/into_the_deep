@@ -23,24 +23,24 @@ public class FrogProvs extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private Servo leftIn, rightIn, wrist, outArm, claw, gate, inWrist;
     private DcMotor horSlide, vertSlideL, vertSlideR, intake;
-double targetPosition = 0;
+    double targetPosition = 0;
 
 
-boolean intakeAbort = false;
+    boolean intakeAbort = false;
     double transferTime = 0.2;
-boolean abort = false;
+    boolean abort = false;
     boolean specReady = false;
     boolean spec = false;
     boolean sample = true;
     boolean slidesUp = false;
     boolean slidesDown = true;
     boolean slidesSpecDown = false;
-boolean slidesSpecUp = false;
+    boolean slidesSpecUp = false;
 
-boolean intakeAction2 = false;
+    boolean intakeAction2 = false;
 
-boolean intakeAction = false;
-private ElapsedTime intakeTimer = new ElapsedTime();
+    boolean intakeAction = false;
+    private ElapsedTime intakeTimer = new ElapsedTime();
 
     boolean transferAction = false;
     private ElapsedTime transferTimer = new ElapsedTime();
@@ -48,11 +48,17 @@ private ElapsedTime intakeTimer = new ElapsedTime();
     boolean outtakeAction = false;
     private ElapsedTime outtakeTimer = new ElapsedTime();
 
+    boolean specScore = false;
+    private ElapsedTime specScoreTimer = new ElapsedTime();
+
     boolean specAction = false;
     private ElapsedTime specTimer = new ElapsedTime();
 
     boolean specAction2 = false;
     private ElapsedTime specTimer2 = new ElapsedTime();
+
+    boolean specAbort = false;
+    private ElapsedTime specAbortTimer = new ElapsedTime();
 
 
     private int dynamicLimit = 1300;
@@ -63,7 +69,7 @@ private ElapsedTime intakeTimer = new ElapsedTime();
 
     private BHI260IMU imu;
 
-//    private ColorRangeSensor coloursensor;
+    //    private ColorRangeSensor coloursensor;
     private TouchSensor hortouch;
     private TouchSensor vertouch;
     boolean resethor = false;
@@ -84,15 +90,15 @@ private ElapsedTime intakeTimer = new ElapsedTime();
 
     armState currentArmState = armState.armIdle;
 
-public enum intakeState {
-    intakeIdle,
-    intaking,
-    intakeTransfering,
-    intakeAbort;
-}
+    public enum intakeState {
+        intakeIdle,
+        intaking,
+        intakeTransfering,
+        intakeAbort;
+    }
 
-intakeState currentIntakeState = intakeState.intakeIdle;
-boolean pidActive = false;
+    intakeState currentIntakeState = intakeState.intakeIdle;
+    boolean pidActive = false;
 
     @Override
     public void init() {
@@ -116,7 +122,7 @@ boolean pidActive = false;
 
         inWrist = hardwareMap.get(Servo.class, "intakewrist");
         inWrist.setDirection(Servo.Direction.FORWARD);
-        inWrist.setPosition(var.inWristTransfer);
+        inWrist.setPosition(var.inWristIntaking);
 
         outArm = hardwareMap.get(Servo.class, "outarm");
         outArm.setDirection(Servo.Direction.FORWARD);
@@ -124,7 +130,7 @@ boolean pidActive = false;
 
         wrist = hardwareMap.get(Servo.class, "wrist");
         wrist.setDirection(Servo.Direction.FORWARD);
-        wrist.setPosition(var.wristTransfer);
+        wrist.setPosition(var.wristInit);
 
         gate = hardwareMap.get(Servo.class, "gate");
         gate.setDirection(Servo.Direction.FORWARD);
@@ -136,11 +142,11 @@ boolean pidActive = false;
 
         leftIn = hardwareMap.get(Servo.class, "leftin");
         leftIn.setDirection(Servo.Direction.FORWARD);
-        leftIn.setPosition(var.inTransfer);
+        leftIn.setPosition(var.inIdle);
 
         rightIn = hardwareMap.get(Servo.class, "rightin");
         rightIn.setDirection(Servo.Direction.FORWARD);
-        rightIn.setPosition(var.inTransfer);
+        rightIn.setPosition(var.inIdle);
 
 
         horSlide = hardwareMap.get(DcMotor.class, "righthor");
@@ -178,288 +184,191 @@ boolean pidActive = false;
 //        coloursensor = hardwareMap.get(ColorRangeSensor.class, "coloursensor");
 
     }
-        public void drive () {
 
-            double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
+    public void drive() {
 
-            boolean slow = gamepad1.options;
-            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-            double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-            double rx = (gamepad1.right_trigger - gamepad1.left_trigger) / turnvar;
+        double turnvar = Math.max(1, 1 + (horSlide.getCurrentPosition() / 1000.0));
 
-
-            double slowvar = 2.0; // Slow mode divisor
-            double speedFactor = slow ? 1 / slowvar : 1;
+        boolean slow = gamepad1.options;
+        double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+        double rx = (gamepad1.right_trigger - gamepad1.left_trigger) / turnvar;
 
 
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
+        double slowvar = 2.0; // Slow mode divisor
+        double speedFactor = slow ? 1 / slowvar : 1;
 
 
-            // Denominator is the largest motor power (absolute value) or 1
-            // This ensures all the powers maintain the same ratio,
-            // but only if at least one is out of the range [-1, 1]
-
-            double frontLeftPower = (y + x + rx) / denominator * speedFactor * 0.8;
-            double backLeftPower = (y - x + rx) / denominator * speedFactor * 0.8;
-            double frontRightPower = (y - x - rx) / denominator * speedFactor * 0.8;
-            double backRightPower = (y + x - rx) / denominator * speedFactor * 0.8;
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 0.8);
 
 
-            // Normalize motor powers
-            double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower),Math.max(Math.abs(backLeftPower), Math.abs(backRightPower))));
-            if (maxPower > 1.0) {
-                frontLeftPower /= maxPower;
-                frontRightPower /= maxPower;
-                backLeftPower /= maxPower;
-                backRightPower /= maxPower;
-            }
-            if (vertSlideL.getCurrentPosition() > 2000) {
-                frontLeftPower = frontLeftPower / 2;
-                frontRightPower = frontRightPower / 2;
-                backLeftPower = backLeftPower / 2;
-                backRightPower = backRightPower / 2;
-            }
-            // Set motor powers
-            frontLeft.setPower(frontLeftPower);
-            frontRight.setPower(frontRightPower);
-            backLeft.setPower(backLeftPower);
-            backRight.setPower(backRightPower);
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+
+        double frontLeftPower = (y + x + rx) / denominator * speedFactor * 0.8;
+        double backLeftPower = (y - x + rx) / denominator * speedFactor * 0.8;
+        double frontRightPower = (y - x - rx) / denominator * speedFactor * 0.8;
+        double backRightPower = (y + x - rx) / denominator * speedFactor * 0.8;
+
+
+        // Normalize motor powers
+        double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower), Math.max(Math.abs(backLeftPower), Math.abs(backRightPower))));
+        if (maxPower > 1.0) {
+            frontLeftPower /= maxPower;
+            frontRightPower /= maxPower;
+            backLeftPower /= maxPower;
+            backRightPower /= maxPower;
+        }
+        if (vertSlideL.getCurrentPosition() > 2000) {
+            frontLeftPower = frontLeftPower / 2;
+            frontRightPower = frontRightPower / 2;
+            backLeftPower = backLeftPower / 2;
+            backRightPower = backRightPower / 2;
+        }
+        // Set motor powers
+        frontLeft.setPower(frontLeftPower);
+        frontRight.setPower(frontRightPower);
+        backLeft.setPower(backLeftPower);
+        backRight.setPower(backRightPower);
+    }
+
+
+    public void manualTake() {
+        //manual controls
+
+        previousGamepad1.copy(currentGamepad1);
+        currentGamepad1.copy(gamepad1);
+
+        previousGamepad2.copy(currentGamepad2);
+        currentGamepad2.copy(gamepad2);
+
+        switch (currentArmState) {
+            case armIdle:
+                if (currentGamepad1.circle && !previousGamepad1.circle) {
+                    claw.setPosition(var.clawOpen);
+                    outArm.setPosition(var.armTransfer);
+                    wrist.setPosition(var.wristTransfer);
+                    vertSlideL.setPower(1);
+                    vertSlideR.setPower(1);
+                    vertSlideL.setTargetPosition(250);
+                    vertSlideR.setTargetPosition(250);
+                    currentArmState = armState.armTransfering;
+
+                } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                    currentArmState = armState.armSpec;
+                }
+                break;
+            case armTransfering:
+
+                if (currentGamepad1.circle && !previousGamepad1.circle) {
+                    claw.setPosition(var.clawClose);
+                    transferAction = true;
+                    transferTimer.reset();
+
+                }
+
+                if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                    claw.setPosition(var.clawClose);
+                    vertSlideL.setPower(1);
+                    vertSlideR.setPower(1);
+                    vertSlideL.setTargetPosition(1000);
+                    vertSlideR.setTargetPosition(1000);
+                    specAction = true;
+                }
+
+
+                break;
+            case armOuttaking:
+
+                if (currentGamepad1.circle && !previousGamepad1.circle) {
+                    claw.setPosition(var.clawOpen);
+                    outtakeAction = true;
+                    outtakeTimer.reset();
+
+                } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //unfinshed
+                    claw.setPosition(var.clawClose);
+                    vertSlideL.setPower(1);
+                    vertSlideR.setPower(1);
+                    vertSlideL.setTargetPosition(1000);
+                    vertSlideR.setTargetPosition(1000);
+                    specAction = true;
+                } break;
+
+            case armSpec:
+                if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                    claw.setPosition(var.clawClose);
+                    specAbort = true;
+                    specAbortTimer.reset();
+                }
+                if (currentGamepad1.triangle && !previousGamepad1.triangle && specAbort && specAbortTimer.seconds() > 1 && specAbortTimer.seconds() < 2) {
+                    claw.setPosition(var.clawOpenWide);
+                    specAbort = false;
+                } else if (specAbort && specAbortTimer.seconds() > 2) {
+                        claw.setPosition(var.clawClose);
+                        specAbort = false;
+                        specScore = true;
+                        specScoreTimer.reset();
+                }
+                break;
+
+            case armSpecScore: //unfinished
+                if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                claw.setPosition(var.clawOpen);
+                currentArmState = armState.armIdle;
+                } break;
         }
 
-    
-
-        
-        public void manualTake () {
-            //manual controls
-
-            previousGamepad1.copy(currentGamepad1);
-            currentGamepad1.copy(gamepad1);
-
-            previousGamepad2.copy(currentGamepad2);
-            currentGamepad2.copy(gamepad2);
-
-            //circle is the outtake button
-            // if sample boolean is true, one press will bring the arm up and another press will lower it
-
-//            if (currentGamepad1.circle && !previousGamepad1.circle && sample && !slidesUp) {   //this will raise the slides to the deposit position. the timer is caused so there is a 0.2 second delay between when you grab the sample and when u move the slides.
-//                claw.setPosition(var.clawClose);
-//                transferAction = true;
-//                transferTimer.reset();
-//            } else if (currentGamepad1.circle && !previousGamepad1.circle && !slidesDown && !slidesSpecDown) { //this is used to lower the slides to the transfer position. it only works if the slide is at the deopis position. THIS SHOULD BE THE DEFAULT POSITION THE CLAW CAN RETURN TO
-//                claw.setPosition(var.clawOpen);
-//                outtakeAction = true;
-//                outtakeTimer.reset();
-//                transferTime = 0.2;
-//            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecDown) { //this is to return the arm to the deposit position when the arm is in the pickup sample position. it needs to be different because there has to be a delay between closing the claw and moving the arm.  THIS IS VERY IMPORTANT OR ELSE THE CLAW WILL BREAK
-//                outArm.setPosition(var.armTransfer);
-//                wrist.setPosition(var.wristTransfer);
-//                claw.setPosition(var.clawClose);
-//                outtakeAction = true;
-//                outtakeTimer.reset();
-//                transferTime = 0.4;
-//            } else if (currentGamepad1.circle && !previousGamepad1.circle && slidesSpecUp) { //this is for lowering the arm to the transfer position. it is the same as the default position i just dk how to do it
-//                outtakeAction = true;
-//                outtakeTimer.reset();
-//                spec = false;
-//                specReady = false;
-//            }
-//
-//            if (transferAction && transferTimer.seconds() > 0.2) { //this timer is for the depositing. 0.2 seconds after the button for deposit is pressed, this will move. THIS IS IMPORTANT TO ENSURE THE CLAW PICKS UP A SAMPLE BEFORE MOVING
-//                vertSlideL.setPower(1);
-//                vertSlideR.setPower(1);
-//                vertSlideL.setTargetPosition(1800);
-//                vertSlideR.setTargetPosition(1800);
-//                outArm.setPosition(var.armOut);
-//                wrist.setPosition(var.wristOut);
-//                slidesDown = false;
-//                slidesUp = true;
-//                transferAction = false;
-//            }
-//
-//            if (outtakeAction && outtakeTimer.seconds() > transferTime) { //this is for trabnsfering. the 0.2 second is necessary to ensure that the claw has time to drop the samples before moving. when this button is pressed when the claw is picking up a specimen THE 0.4 SECOND WAIT IS REQUIRED OR ELSE THE CLAW WILL BREAK
-//                outArm.setPosition(var.armTransfer);
-//                wrist.setPosition(var.wristTransfer);
-//                vertSlideL.setPower(1);
-//                vertSlideR.setPower(1);
-//                vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                vertSlideR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                vertSlideL.setTargetPosition(0);
-//                vertSlideR.setTargetPosition(0);
-//                slidesDown = true;
-//                slidesUp = false;
-//                outtakeAction = false;
-//                claw.setPosition(var.clawOpen);
-//               // sample = false;
-//            }
-//
-//
-//            //triangle is the specimen scoring position
-//            if (currentGamepad1.triangle && !previousGamepad1.triangle) { //all triangles are here
-//                if (!slidesSpecDown && !spec && !specReady) { //this brings the arm to the spec pickup
-//                    claw.setPosition(var.clawClose);
-//                    vertSlideL.setPower(1);
-//                    vertSlideR.setPower(1);
-//                    vertSlideL.setTargetPosition(1000);
-//                    vertSlideR.setTargetPosition(1000);
-//                    outArm.setPosition(var.armSpec);
-//                    wrist.setPosition(var.wristSpec);
-//                    specTimer.reset();
-//                    specAction = true;
-//
-//
-//                } else if (slidesSpecDown && !slidesSpecUp && !spec && !specReady) { //this brings the arm to the spec score
-//
-//                    claw.setPosition(var.clawClose);
-//                    specTimer2.reset();
-//                    specAction2 = true;
-//                    spec = true;
-//                    abort = false;
-//
-//                } else if (slidesSpecUp && specReady) { //this releases the spec to score it
-//                    claw.setPosition(var.clawOpen);
-//                    specReady = false;
-//                    spec = false;
-//                }
-//            }
-//
-//            if (specAction && specTimer.seconds() > 0.5) { //this is for when the arm moves from default to spec pickup. THIS 0.5 SECOND WAIT BEFORE REOPENING THE CLAW IS REQUIRED OR ELSE THE CLAW WILL BREAK
-//                claw.setPosition(var.clawOpenWide);
-//                slidesSpecDown = true;
-//                slidesSpecUp = false;
-//                specAction = false;
-//            }
-//            if (specAction2 && specTimer2.seconds() > 1 && !abort) { //this is the code to bring the arm to the scoring position. THE 1 SECOND WAIT IS REQUIRED BEFORE MOVING THE ARM OR ELSE THE CLAW WILL BREAK
-//                outArm.setPosition(var.armSpecScore);
-//                wrist.setPosition(var.wristSpecScore);
-//                vertSlideL.setPower(1);
-//                vertSlideR.setPower(1);
-//                vertSlideL.setTargetPosition(1600);
-//                vertSlideR.setTargetPosition(1600);
-//                slidesSpecUp = true;
-//                slidesSpecDown = false;
-//                specReady = true;
-//                specAction2 = false;
-//            } else if (currentGamepad1.triangle && !previousGamepad1.triangle && !abort && specTimer2.seconds() < 1 && specTimer2.seconds() > 0.1 && specAction2) { //this is an abort. when the claw is at the specimen pickup position and you press triangle again. If u miss, you have 1 second to abort. it will reset you to the specimen pickup position
-//                abort = true;
-//                slidesSpecDown = true;
-//                slidesSpecUp = false;
-//                specReady = false;
-//                spec = false;
-//                specAction2 = false;
-//                claw.setPosition(var.clawOpenWide);
-//
-//            }
-
-
-switch (currentArmState) {
-  case armIdle:
-        vertSlideL.setPower(1);
-        vertSlideR.setPower(1);
-        vertSlideL.setTargetPosition(0);
-        vertSlideR.setTargetPosition(0);
-        if (currentGamepad1.circle && !previousGamepad1.circle) {
-            currentArmState = armState.armOuttaking;
-        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-            currentArmState = armState.armSpec;
-        } break;
-    case armTransfering:
-
-		if (currentGamepad1.circle && !previousGamepad1.circle) {
-			claw.setPosition(var.clawClose);
-   		    vertSlideL.setPower(1);
-  	      	vertSlideR.setPower(1);
-        	vertSlideL.setTargetPosition(2000);
-        	vertSlideR.setTargetPosition(2000);
+        if(transferAction && transferTimer.seconds() > 0.5 ){
+            vertSlideL.setPower(1);
+            vertSlideR.setPower(1);
+            vertSlideL.setTargetPosition(2000);
+            vertSlideR.setTargetPosition(2000);
             outArm.setPosition(var.armOut);
             wrist.setPosition(var.wristOut);
             currentArmState = armState.armOuttaking;
-			}
-
-		if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-			claw.setPosition(var.clawClose);
-			vertSlideL.setPower(1);
-  	      	vertSlideR.setPower(1);
-        	vertSlideL.setTargetPosition(2000);
-        	vertSlideR.setTargetPosition(2000);
-			specAction = true
+            transferAction = false;
         }
 
-		if (specAction && vertSlideL.getPosition() > 500) {
-			arm.setPosition(var.armSpec);
-			wrist.setPosition(var.wristSpec);
-			specAction2 = true
-			specTimer2.reset()
-		}
+        if (outtakeAction && outtakeTimer.seconds() > 0.5) {
+            outArm.setPosition(var.armTransfer);
+            wrist.setPosition(var.wristTransfer);
+            vertSlideL.setPower(1);
+            vertSlideR.setPower(1);
+            vertSlideL.setTargetPosition(250);
+            vertSlideR.setTargetPosition(250);
+            currentArmState = armState.armTransfering;
+            outtakeAction = false;
+        }
+        if (specScore && specScoreTimer.seconds() > 0.5) {
+            outArm.setPosition(var.armSpecScore);
+            wrist.setPosition(var.wristSpecScore);
+            currentArmState = armState.armSpecScore;
+        }
 
-		if (specAction2 && specTimer2.seconds() > 1) {
-			claw.setPosition(var.clawOpen);
-			currentArmState = armState.armSpec;
-		
-        } break;
-    case armOuttaking:
-        
-            if (currentGamepad1.circle && !previousGamepad1.circle) {
-				claw.setposition(var.clawOpen);
-				outArm.setPosition(var.armTransfer);
-				wrist.setPosition(var.wristTransfer);
-				vertSlideL.setPower(1);
-  	      		vertSlideR.setPower(1);
-        		vertSlideL.setTargetPosition(0);
-        		vertSlideR.setTargetPosition(0);
-                currentArmState = armState.armTransfering;
-
-
-            } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //unfinshed
-				
-                currentArmState = armState.armSpec;
-            }
-        } break;
-    case armSpec: //unfininshed
-        claw.setPosition(var.clawClose);
-        vertSlideL.setPower(1);
-        vertSlideR.setPower(1);
-        vertSlideL.setTargetPosition(1000);
-        vertSlideR.setTargetPosition(1000);
-        if (vertSlideL.getCurrentPosition() > 500) {
+        if (specAction && vertSlideL.getCurrentPosition() > 500) {
             outArm.setPosition(var.armSpec);
             wrist.setPosition(var.wristSpec);
             specAction2 = true;
-            specTimer2.reset();
-            if (specAction2 && specTimer2.seconds() > 1) {
-                specAction2 = false;
-                claw.setPosition(var.clawOpenWide);
-                if (currentGamepad1.circle && !previousGamepad1.circle) {
-                    currentArmState = armState.armTransfering;
-                } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                    currentArmState = armState.armSpecScore;
-                }
-            }
-        } break;
-    case armSpecScore: //unfinished
-        vertSlideL.setPower(1);
-        vertSlideR.setPower(1);
-        vertSlideL.setTargetPosition(1500);
-        vertSlideR.setTargetPosition(1500);
-        claw.setPosition(var.clawClose);
-        specAction = true;
-        specTimer.reset();
-        if (specAction && specTimer.seconds() > 1) {
             specAction = false;
-            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                claw.setPosition(var.clawOpen);
-                if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                    currentArmState = armState.armSpec;
-                } else if (currentGamepad1.circle && !previousGamepad1.circle){
-                    currentArmState = armState.armTransfering;
-                }
-            }
+            specTimer2.reset();
         }
-        break;
-}
+
+        if (specAction2 && specTimer2.seconds() > 1) {
+            claw.setPosition(var.clawOpenWide);
+            currentArmState = armState.armSpec;
+            specAction2 = false;
+        }
 
 
             switch (currentIntakeState) {
+
+
                 case intakeIdle:
+                    if (gamepad1.left_bumper) {
+                        intake.setPower(-1);
+                        break;
+                    }
                     if (currentGamepad1.cross && !previousGamepad1.cross || intakeAbort) { //nigga intake
                         gate.setPosition(var.gateClose);
                         intake.setPower(1);
@@ -471,6 +380,10 @@ switch (currentArmState) {
                     }
                     break;
                 case intaking:
+                    if (gamepad1.left_bumper) {
+                        intake.setPower(-1);
+                        break;
+                    }
                     if (currentGamepad1.cross && !previousGamepad1.cross) {//nigga transfer
                         leftIn.setPosition(var.inTransfer);
                         rightIn.setPosition(var.inTransfer);
@@ -480,22 +393,27 @@ switch (currentArmState) {
                     }
                     break;
                 case intakeTransfering:
-
+                    if (gamepad1.left_bumper) {
+                        intake.setPower(-1);
+                        break;
+                    }
                     if (intakeTimer.seconds() < 1 && currentGamepad1.cross && !previousGamepad1.cross) {//nigga wait
                         intakeAbort = true;
                         currentIntakeState = intakeState.intakeIdle;
                         break;
                     } else if (2 > intakeTimer.seconds() && intakeTimer.seconds() > 1) {
                         gate.setPosition(var.gateOpen);
-                        intake.setPower(0.6);
-                    } else if (intakeTimer.seconds() > 2) {
-                        gate.setPosition(var.gateOpen);
-                        leftIn.setPosition(var.inTransfer);
-                        rightIn.setPosition(var.inTransfer);
-                        intake.setPower(0);
-                        currentIntakeState = intakeState.intakeIdle;
+                        intakeAction = true;
+                        intakeTimer.reset();
+
                     }
-                    break;
+                    if (intakeTimer.seconds() > 1 && intakeAction) {
+                        intake.setPower(0.8);
+                    } else if (intakeTimer.seconds() > 2 & intakeAction) {
+                        intake.setPower(0);
+                        intakeAction = false;
+                        currentIntakeState = intakeState.intakeIdle;
+                    } break;
             }
 
 
