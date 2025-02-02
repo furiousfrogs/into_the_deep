@@ -32,7 +32,9 @@ public class Take {
         if(initModule.currentGamepad2.triangle && !initModule.previousGamepad2.triangle){
             initModule.currentGod[8]=VarAll.clawOpen;
         }
-        if(initModule.currentGamepad2.square && !initModule.previousGamepad2.square)
+        if(initModule.currentGamepad2.square && !initModule.previousGamepad2.square){
+
+        }
     }
     
 }
