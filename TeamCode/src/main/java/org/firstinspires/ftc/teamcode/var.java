@@ -10,14 +10,14 @@ public class var {
     public static float OuttakeTime = 0.3F;
     public static float OuttakeTime2 = 0.5F;
 
-    public static float inWristIntaking = 0.55F; //LIKELY TO CHANGE
-    public static float inWristTransfer = 0.75F;
+    public static float inWristIntaking = 0.5F; //LIKELY TO CHANGE
+    public static float inWristTransfer = 0.25F;
 
     public static float gateOpen = 0.1F;
     public static float gateClose = 0.35F;
 
     //Bigger number - intake is lower
-    public static float inDown = 0.63F; //LIKELY TO CHANGE
+    public static float inDown = 0.58F; //LIKELY TO CHANGE
     public static float inTransfer = 0.05F;
     public static float inIdle = 0.1F;
 

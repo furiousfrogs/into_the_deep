@@ -256,7 +256,12 @@ public class FrogProvs extends OpMode {
                     currentArmState = armState.armTransfering;
 
                 } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                    currentArmState = armState.armSpec;
+                    claw.setPosition(var.clawClose);
+                    vertSlideL.setPower(1);
+                    vertSlideR.setPower(1);
+                    vertSlideL.setTargetPosition(1000);
+                    vertSlideR.setTargetPosition(1000);
+                    specAction = true;
                 }
                 break;
             case armTransfering:
@@ -296,30 +301,31 @@ public class FrogProvs extends OpMode {
                 } break;
 
             case armSpec:
-                if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                    claw.setPosition(var.clawClose);
-                    specAbort = true;
-                    specAbortTimer.reset();
+
+                if (!specAbort && currentGamepad1.triangle && !previousGamepad1.triangle) {
+                        claw.setPosition(var.clawClose);
+                        specAbort = true;
+                        specAbortTimer.reset();
                 }
-                if (currentGamepad1.triangle && !previousGamepad1.triangle && specAbort && specAbortTimer.seconds() > 1 && specAbortTimer.seconds() < 2) {
+                if (specAbort && specAbortTimer.seconds() < 0.5 && currentGamepad1.triangle && !previousGamepad1.triangle) {
                     claw.setPosition(var.clawOpenWide);
                     specAbort = false;
-                } else if (specAbort && specAbortTimer.seconds() > 2) {
-                        claw.setPosition(var.clawClose);
-                        specAbort = false;
-                        specScore = true;
-                        specScoreTimer.reset();
+                } else if (specAbort && specAbortTimer.seconds() > 0.5 && currentGamepad1.triangle && !previousGamepad1.triangle) {
+                    specAbort = false;
+                    claw.setPosition(var.clawClose);
+                    specScore = true;
+                    specScoreTimer.reset();
                 }
                 break;
 
-            case armSpecScore: //unfinished
+            case armSpecScore:
                 if (currentGamepad1.triangle && !previousGamepad1.triangle) {
                 claw.setPosition(var.clawOpen);
                 currentArmState = armState.armIdle;
                 } break;
         }
 
-        if(transferAction && transferTimer.seconds() > 0.5 ){
+        if (transferAction && transferTimer.seconds() > 0.5 ) {
             vertSlideL.setPower(1);
             vertSlideR.setPower(1);
             vertSlideL.setTargetPosition(2000);
@@ -331,6 +337,7 @@ public class FrogProvs extends OpMode {
         }
 
         if (outtakeAction && outtakeTimer.seconds() > 0.5) {
+
             outArm.setPosition(var.armTransfer);
             wrist.setPosition(var.wristTransfer);
             vertSlideL.setPower(1);
@@ -344,6 +351,7 @@ public class FrogProvs extends OpMode {
             outArm.setPosition(var.armSpecScore);
             wrist.setPosition(var.wristSpecScore);
             currentArmState = armState.armSpecScore;
+            specScore = false;
         }
 
         if (specAction && vertSlideL.getCurrentPosition() > 500) {
@@ -361,17 +369,15 @@ public class FrogProvs extends OpMode {
         }
 
 
+
+
             switch (currentIntakeState) {
 
 
                 case intakeIdle:
-                    if (gamepad1.left_bumper) {
-                        intake.setPower(-1);
-                        break;
-                    }
+
                     if (currentGamepad1.cross && !previousGamepad1.cross || intakeAbort) { //nigga intake
                         gate.setPosition(var.gateClose);
-                        intake.setPower(1);
                         leftIn.setPosition(var.inDown);
                         rightIn.setPosition(var.inDown);
                         inWrist.setPosition(var.inWristIntaking);
@@ -380,10 +386,13 @@ public class FrogProvs extends OpMode {
                     }
                     break;
                 case intaking:
-                    if (gamepad1.left_bumper) {
+
+                    if (!gamepad1.left_bumper) {
+                        intake.setPower(1);
+                    } else if (gamepad1.left_bumper) {
                         intake.setPower(-1);
-                        break;
                     }
+
                     if (currentGamepad1.cross && !previousGamepad1.cross) {//nigga transfer
                         leftIn.setPosition(var.inTransfer);
                         rightIn.setPosition(var.inTransfer);
@@ -393,10 +402,7 @@ public class FrogProvs extends OpMode {
                     }
                     break;
                 case intakeTransfering:
-                    if (gamepad1.left_bumper) {
-                        intake.setPower(-1);
-                        break;
-                    }
+
                     if (intakeTimer.seconds() < 1 && currentGamepad1.cross && !previousGamepad1.cross) {//nigga wait
                         intakeAbort = true;
                         currentIntakeState = intakeState.intakeIdle;
@@ -409,7 +415,7 @@ public class FrogProvs extends OpMode {
                     }
                     if (intakeTimer.seconds() > 1 && intakeAction) {
                         intake.setPower(0.8);
-                    } else if (intakeTimer.seconds() > 2 & intakeAction) {
+                    } else if (intakeTimer.seconds() > 2 && intakeAction) {
                         intake.setPower(0);
                         intakeAction = false;
                         currentIntakeState = intakeState.intakeIdle;
