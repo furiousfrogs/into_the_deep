@@ -27,7 +27,7 @@ public class VarAll {
     public static float wristSpecimen=0.0F;
     public static float wristHuman=0.0F;
     //claw
-    public static float wristIdle=0.0F;
+    public static float clawIdle=0.0F;
     public static float clawGrab=0.0F;
     public static float clawSample=0.0F;
     public static float clawSpecimen=0.0F;
