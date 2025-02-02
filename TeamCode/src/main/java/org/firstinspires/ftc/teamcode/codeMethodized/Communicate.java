@@ -29,16 +29,16 @@ public class Communicate {
         initModule.claw.setPosition(initModule.currentGod[8]);
         telemetry.addData("claw:",initModule.currentGod[8]);
 
-        initModule.horSlide.setPower(initModule.currentGod[9]);
+        initModule.horSlide.setTargetPosition(initModule.currentGod[9]);
         telemetry.addData("horSlide:",initModule.currentGod[9]);
 
-        initModule.vertSlideL.setPower(initModule.currentGod[10]);
+        initModule.vertSlideL.setTargetPosition(initModule.currentGod[10]);
         telemetry.addData("vertSlideL:",initModule.currentGod[10]);
 
-        initModule.vertSlideR.setPower(initModule.currentGod[11]);
+        initModule.vertSlideR.setTargetPosition(initModule.currentGod[11]);
         telemetry.addData("vertSlideL:",initModule.currentGod[11]);
 
-        initModule.intake.setPower(initModule.currentGod[12]);
+        initModule.intake.setTargetPosition(initModule.currentGod[12]);
         telemetry.addData("intake:",initModule.currentGod[12]);
 
         initModule.gate.setPosition(initModule.currentGod[13]);
