@@ -63,25 +63,19 @@ public class Initialization {
         horSlide=hardwareMap.get(DcMotor.class,"rightHor");
         horSlide.setDirection(DcMotor.Direction.REVERSE);
         horSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        horSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        horSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        horSlide=hardwareMap.get(DcMotor.class,"rightHor");
-        horSlide.setDirection(DcMotor.Direction.FORWARD);
-        horSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        horSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        horSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         horSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         vertSlideL=hardwareMap.get(DcMotor.class,"leftVertical");
         vertSlideL.setDirection(DcMotor.Direction.REVERSE);
         vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vertSlideL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         vertSlideR=hardwareMap.get(DcMotor.class,"rightVertical");
         vertSlideR.setDirection(DcMotor.Direction.REVERSE);
         vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vertSlideR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vertSlideR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
@@ -99,8 +93,8 @@ public class Initialization {
         previousGamepad2.copy(currentGamepad2);
 
 
-        hortouch=hardwareMap.get(TouchSensor.class,"horTouch");
-        vertouch=hardwareMap.get(TouchSensor.class,"verTouch");
+        horTouch=hardwareMap.get(TouchSensor.class,"horTouch");
+        verTouch=hardwareMap.get(TouchSensor.class,"verTouch");
         coloursensor=hardwareMap.get(ColorRangeSensor.class,"colourSensor");
     }
 }

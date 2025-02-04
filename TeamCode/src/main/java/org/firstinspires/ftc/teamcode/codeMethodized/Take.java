@@ -3,8 +3,22 @@ package org.firstinspires.ftc.teamcode.codeMethodized;
 
 public class Take {
     private float state=0.0F;
-    private boolean direction=true;//true is positive (samples), false is negative (specimen)
     public void manualTake(Initialization initModule){
+        if(initModule.horTouch.isPressed()){
+            initModule.horSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            initModule.horSlide.setPower(0);
+            initModule.horSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            initModule.horSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            initModule.currentGod[9]=0.0;
+        }
+        if(initModule.verTouch.isPressed())}{
+            initModule.horSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            initModule.verTouch.setPower(0);
+            initModule.verTouch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            initModule.verTouch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            initModule.currentGod[10]=0.0;
+            initModule.currentGod[11]=0.0;
+        }
         if(initModule.currentGamepad1.triangle){
             initModule.target= !initModule.target;
         }
@@ -26,16 +40,18 @@ public class Take {
                     initModule.currentGod[12]=0;
                 }
         }
-        initModule.currentGod[9]=-initModule.currentGamepad2.left_stick_x;
-        initModule.currentGod[10]=-initModule.currentGamepad2.left_stick_y;
-        initModule.currentGod[11]=-initModule.currentGamepad2.left_stick_y;
+        initModule.currentGod[9]-=initModule.currentGamepad2.left_stick_x;
+        initModule.currentGod[10]-=initModule.currentGamepad2.left_stick_y;
+        initModule.currentGod[11]-=initModule.currentGamepad2.left_stick_y;
         if(initModule.currentGamepad2.triangle && !initModule.previousGamepad2.triangle){
-            initModule.currentGod[8]=VarAll.clawOpen;
+            if (initModule.currentGod[8]==VarAll.clawOpen){
+                initModule.currentGod[8]=VarAll.clawClose;
+            }else{
+                initModule.currentGod[8]=VarAll.clawOpen
+            }
         }
         if(initModule.currentGamepad2.square && !initModule.previousGamepad2.square){
 
         }
     }
-    
-}
 
