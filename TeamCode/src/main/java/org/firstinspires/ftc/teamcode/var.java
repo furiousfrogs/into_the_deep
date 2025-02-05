@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
-import com.acmerobotics.dashboard.config.Config;
-@Config
+
 public class var {
     //Time
     public static float TransferATime = 0.7F;
@@ -11,7 +10,8 @@ public class var {
     public static float OuttakeTime2 = 0.5F;
 
     public static float inWristIntaking = 0.5F; //LIKELY TO CHANGE
-    public static float inWristTransfer = 0.25F;
+    public static float inWristTransfer = 0.22F;
+    public static float inWristSpit = 0.45F;
 
     public static float gateOpen = 0.1F;
     public static float gateClose = 0.35F;
@@ -29,7 +29,7 @@ public class var {
 
     //Bigger number - claw is open
     public static float clawClose = 0.63F;
-    public static float clawOpen = 0.45F;
+    public static float clawOpen = 0.58F;
     public static float clawOpenWide = 0.3F;
 
     //Bigger number - wrist goes out

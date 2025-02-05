@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Initialization {
     public DcMotor frontLeft,frontRight,backLeft,backRight;
@@ -24,7 +25,7 @@ public class Initialization {
     Gamepad currentGamepad2;
     Gamepad previousGamepad2;
 
-    private ElapsedTime Timer=new ElapsedTime()
+    public ElapsedTime Timer=new ElapsedTime();
 
     public void initialize(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         //initalized stuff
@@ -67,18 +68,21 @@ public class Initialization {
         horSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         horSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         horSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        horSlide.setPower(1);
 
         vertSlideL=hardwareMap.get(DcMotor.class,"leftVertical");
         vertSlideL.setDirection(DcMotor.Direction.REVERSE);
         vertSlideL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vertSlideL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        vertSlideL.setPower(1);
 
         vertSlideR=hardwareMap.get(DcMotor.class,"rightVertical");
         vertSlideR.setDirection(DcMotor.Direction.REVERSE);
         vertSlideR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vertSlideR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         vertSlideR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        vertSlideR.setPower(1);
 
 
         intake=hardwareMap.get(DcMotor.class,"intake");

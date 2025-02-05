@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.codeMethodized;
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
 @Config
 public class VarAll {
     //All hardware init positions
@@ -28,7 +26,7 @@ public class VarAll {
     public static float clawClose=0.0F;
 
     //intake box
-    public static float intakeBoxUp;=0.0F
+    public static float intakeBoxUp=0.0F;
     public static float intakeBoxDown=0.0F;
 
     //vert slides
@@ -70,5 +68,5 @@ public class VarAll {
     public static double LEDtest = 0.61; //RED
 
     //[frontLeft, frontRight, backLeft, backRight, leftIn, rightIn, outArm, wrist, claw, horSlide, vertSlideL, vertSlideR, intake, gate]
-    static double[] initPos = {0.0,0.0,0.0,0.0,(double)inIdle,(double)inIdle,(double)armTransfer,(double)wristTransfer,(double)clawOpen,0.0,0.0,0.0,0.0,(double)gateClose};
+    static double[] initPos = {0.0,0.0,0.0,0.0,(double)intakeBoxDown,(double)intakeBoxDown,(double)armIdle,(double)wristIdle,(double)clawIdle,(double)horSlideIdle,(double)vertSlideIdle,(double)vertSlideIdle,0.0,(double)gateClose};
 }

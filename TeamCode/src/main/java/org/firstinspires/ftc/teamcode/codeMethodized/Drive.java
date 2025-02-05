@@ -15,6 +15,5 @@ public class Drive {
         initModule.currentGod[2]=frontRightPower;
         initModule.currentGod[3]=backRightPower;
     }
-    
 }
 

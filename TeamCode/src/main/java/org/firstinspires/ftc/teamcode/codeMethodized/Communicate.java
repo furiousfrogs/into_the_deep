@@ -31,15 +31,15 @@ public class Communicate {
         }
 
         if(initModule.currentGod[9]>=0.0){
-            initModule.horslide.setTargetPosition(int)initModule.currentGod[9];
+            initModule.horSlide.setTargetPosition((int)initModule.currentGod[9]);
         }
 
         if(initModule.currentGod[10]>=0.0){
-            initModule.vertSlideL.setTargetPosition(int)initModule.currentGod[10];
+            initModule.vertSlideL.setTargetPosition((int)initModule.currentGod[10]);
         }
 
         if(initModule.currentGod[11]>=0.0){
-            initModule.vertSlideR.setTargetPosition(int)initModule.currentGod[11];
+            initModule.vertSlideR.setTargetPosition((int)initModule.currentGod[11]);
         }
         
         initModule.intake.setPower((int) initModule.currentGod[12]);
