@@ -24,6 +24,8 @@ public class Initialization {
     Gamepad currentGamepad2;
     Gamepad previousGamepad2;
 
+    private ElapsedTime Timer=new ElapsedTime()
+
     public void initialize(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         //initalized stuff
         frontLeft=hardwareMap.get(DcMotor.class,"front_left");

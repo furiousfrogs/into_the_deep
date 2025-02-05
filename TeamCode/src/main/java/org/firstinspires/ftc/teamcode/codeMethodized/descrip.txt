@@ -21,8 +21,9 @@ target: false=specimen, true=sample
 color: false=blue, true=red
 
 
-heiarchy:
-manual control
-state control
-safety control
-reset control
+things to add:
+make wait timers work
+
+color sensing
+leds
+better drive
