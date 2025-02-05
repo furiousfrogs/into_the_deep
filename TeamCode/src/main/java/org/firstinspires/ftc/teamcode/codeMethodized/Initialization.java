@@ -12,8 +12,8 @@ public class Initialization {
     public Servo leftIn, rightIn, wrist, outArm, claw, gate;
     public DcMotor horSlide,vertSlideL, vertSlideR, intake;
     public ColorRangeSensor coloursensor;
-    public TouchSensor hortouch;
-    public TouchSensor vertouch;
+    public TouchSensor horTouch;
+    public TouchSensor verTouch;
     //variables
     double[] currentGod = VarAll.initPos;
     double[] previousGod = currentGod;
